@@ -7,29 +7,21 @@ from ..application_package.get_query_params import get_query_params
 from ..models import Profile
 from .serializers import ProfileSerializer
 
-
-
-
+log = False
 
 @api_view(['GET', 'POST'])
 def get_post_profile(request):
     if request.method == 'GET':
         try:
-            print ('INGRESANDO A GET AND TRY')
             profiles = get_query_params(request, Profile)
-            
             if profiles == 'not found':
                 return Response(status=status.HTTP_404_NOT_FOUND)
-
-            if profiles == 'bad request':
+            elif profiles == 'bad request':
                 return Response(status=status.HTTP_400_BAD_REQUEST)
-
         except:
-            print ("INGRESANDO A GET AND EXCEPT")
             profiles = Profile.objects.all()
         serializer = ProfileSerializer(profiles, many=True)
         return Response(serializer.data)
-
 
     elif request.method == 'POST':
         serializer = ProfileSerializer(data=request.data)
@@ -37,10 +29,6 @@ def get_post_profile(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
