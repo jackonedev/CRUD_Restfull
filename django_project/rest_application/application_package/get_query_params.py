@@ -1,5 +1,4 @@
 def get_query_params(request, model):
-    print ('INGRESANDO A get_query_params')
     name = request.query_params.get('name', None)
     last_name = request.query_params.get('last_name', None)
     age = request.query_params.get('age', None)
@@ -30,7 +29,6 @@ def get_query_params(request, model):
         elif last_name:
             profiles = model.objects.filter(last_name=last_name)
         elif age:
-            print (f'ingresando a age con valor: {age}')
             profiles = model.objects.filter(age=age)
         else:
             profiles = 'not found'
