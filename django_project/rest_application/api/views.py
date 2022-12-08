@@ -7,7 +7,6 @@ from ..application_package.get_query_params import get_query_params
 from ..models import Profile
 from .serializers import ProfileSerializer
 
-log = False
 
 @api_view(['GET', 'POST'])
 def get_post_profile(request):
@@ -26,13 +25,19 @@ def get_post_profile(request):
     elif request.method == 'POST':
         serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            data = serializer.validated_data
+            data['personal_id'] = data['personal_id'].replace('-', '').replace('.', '')
+            serializer = ProfileSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def get_put_delete_profile(request, pk):
+    if not pk.isdigit():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
     try:
         profile = Profile.objects.get(pk=pk)
     except Profile.DoesNotExist:
@@ -41,12 +46,18 @@ def get_put_delete_profile(request, pk):
     if request.method == 'GET':
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
+
     elif request.method == 'PUT':
         serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            data = serializer.validated_data
+            data['personal_id'] = data['personal_id'].replace('-', '').replace('.', '')
+            serializer = ProfileSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     elif request.method == 'DELETE':
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
