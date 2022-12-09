@@ -25,24 +25,28 @@
                 </tr>
             </thead>
 
-            <tbody id="forms">
+            <tbody>
             </tbody>
+            <!-- TODO: este modelo que el formulario esté chiquito debajo del botón es basura -->
 
             <tfoot>
                 <!-- TODO: el boton GO! va dentro de un template que se ejecuta dentro del main de pyscript - para poder eliminarlo cuando se cliquea -->
                 <tr id="buttons">
                     <th class="col text-center">
-                        <button type="button" class="btn btn-primary btn-sm" id="action">GO!</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="read-download">GO!</button>
                     </th>
                     <th class="col text-center">
-                        <button type="button" class="btn btn-primary btn-sm" id="action">GO!</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="create">GO!</button>
                     </th>
                     <th class="col text-center">
-                        <button type="button" class="btn btn-primary btn-sm" id="action">GO!</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="update-delete">GO!</button>
                     </th>
                 </tr>
             </tfoot>
         </table>
+
+        <div id="form-loc">
+        </div>
 
     </div>
 
@@ -50,9 +54,9 @@
     <template id="template-form">
         <div class="card">
             <div class="card-body">
-                <h5 class="card-title"></h5>
-                <p class="card-text"></p>
-                <input href="#" class="btn btn-primary">make request</input>
+                <h5 class="card-title">Titulo</h5>
+                <div id="form">
+                </div>
             </div>
         </div>
     </template>
