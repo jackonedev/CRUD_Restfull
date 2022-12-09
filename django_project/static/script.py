@@ -127,35 +127,30 @@ def proxy_container(e):
     elif e.target.id == 'update-delete':
         console.log(e.target.id)
         update_delete()
+    
+    e.stopPropagation()
 
 
 async def search_data(e):
     console.log('search_data')
     pass
-
 async def export_data(e):
     console.log('export_data')
     pass
-
 async def create_data(e):
     console.log('create_data')
     pass
-
 async def update_data(e):
     console.log('update_data')
     pass
-
 async def delete_data(e):
     console.log('delete_data')
     pass
-
-
-
 def proxy_form_location(e):
     global templateForm
     console.log(e.target)
 
-    if e.target.parentElement.dataset.id == 'action-1':#TODO: no fuinciona
+    if e.target.id == 'search':#TODO: no fuinciona
         search = templateForm.querySelector('#search')
         export = templateForm.querySelector('#export')
 
@@ -176,16 +171,16 @@ def proxy_form_location(e):
         delete.addEventListener('click', create_proxy(delete_data))
 
 
-
-
 def main():
-    global templateForm, form_loc, templateButtons, container
+    global container, templateForm, form_loc, templateButtons, btn_loc
     global fragment
     fragment = document.createDocumentFragment()
 
     container = document.querySelector('.container')
     form_loc = document.querySelector('#form-loc')
+    btn_loc = document.querySelector('#btn-loc')
     templateForm = document.getElementById('template-form').content
+    templateButtons = document.getElementById('template-buttons').content
 
 
     container.addEventListener('click', create_proxy(proxy_container))
