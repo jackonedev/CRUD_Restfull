@@ -135,34 +135,85 @@ def proxy_container(e):
     
     e.stopPropagation()
 
-    console.log('proxy_container')
+    # console.log('proxy_container')
 
 
 def search_data(e):
     console.log('search_data')
-    search = templateForm.querySelector('#search')
     
+    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+    name = document.querySelectorAll('.form-control-sm')[1].value
+    last_name = document.querySelectorAll('.form-control-sm')[2].value
+    age = document.querySelectorAll('.form-control-sm')[3].value
+
+    data = {
+        'id': personal_id,
+        'name': name,
+        'last_name': last_name,
+        'age': age
+    }
+    
+    body = {}
+    
+    
+    console.log(str(data))
 
 def export_data(e):
     console.log('export_data')
-    export = templateForm.querySelector('#export')
-    pass
+
+    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+    name = document.querySelectorAll('.form-control-sm')[1].value
+    last_name = document.querySelectorAll('.form-control-sm')[2].value
+    age = document.querySelectorAll('.form-control-sm')[3].value
+
+    data = {
+        'id': personal_id,
+        'name': name,
+        'last_name': last_name,
+        'age': age
+    }
+
+    console.log(str(data))
+
+
+    
 def create_data(e):
-    create = templateForm.querySelector('#create')
     console.log('create_data')
-    pass
+    
+    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+
+    data = {
+        'id': personal_id,
+    }
+
+    console.log(str(data))
+
+
 def update_data(e):
     console.log('update_data')
-    update = templateForm.querySelector('#update')
-    pass
+
+    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+
+    data = {
+        'id': personal_id,
+    }
+
+    console.log(str(data))
+    
 def delete_data(e):
     console.log('delete_data')
-    delete = templateForm.querySelector('#delete')
-    pass
+
+    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+
+    data = {
+        'id': personal_id,
+    }
+
+    console.log(str(data))
+    
 
 def proxy_form_location(e):
     global form_loc, templateForm
-    console.log('hola')
 
     action = templateForm.querySelector('#form').dataset.id
     button_id = e.target.id
