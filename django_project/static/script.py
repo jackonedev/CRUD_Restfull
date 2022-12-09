@@ -21,6 +21,4 @@ async def make_request(url, method, body=None, headers=None):
 )
 
     return await response.json()
-
-
-
+    
