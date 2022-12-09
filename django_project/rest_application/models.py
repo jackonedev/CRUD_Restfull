@@ -24,7 +24,6 @@ class Profile(models.Model):
     name = models.CharField(max_length=50, validators=[valid_name])
     last_name = models.CharField(max_length=50, validators=[valid_name])
     age = models.PositiveIntegerField(validators=[valid_age])
-    profile_image = models.ImageField(upload_to='profile/profile_image', blank=True, null=True)
 
     def __str__(self):
         s = f'{self.name} {self.last_name}, ({self.personal_id})'
