@@ -20,7 +20,8 @@ async def make_request(url, method, body=None, headers=None):
         headers=default_headers
 )
     return await response.json()
-    
+
+
 def create_field(id=None):
     field = document.createElement('input')
     field.type = 'text'
@@ -30,7 +31,6 @@ def create_field(id=None):
         field.id = id
     return field
 
-
 def create_button(textContent, id, class_name):
     button = document.createElement('button')
     button.type = 'button'
@@ -38,6 +38,7 @@ def create_button(textContent, id, class_name):
     button.id = id
     button.setAttribute('class', class_name)
     return button
+
 
 def read_download():
     global fragment, form_loc, templateForm
@@ -64,13 +65,14 @@ def read_download():
     templateForm.querySelector('#form').appendChild(field_age)
     templateForm.querySelector('#form').appendChild(search)
     templateForm.querySelector('#form').appendChild(export)
+    templateForm.querySelector('#form').dataset.id = 'action-1'
     console.log(templateForm.querySelector('#form'))
 
     clone = templateForm.cloneNode(True)
     fragment.appendChild(clone)
 
     form_loc.appendChild(fragment)
-    
+
 def create():
     global fragment, form_loc, templateForm
     form_loc.textContent = ''
@@ -84,6 +86,7 @@ def create():
     templateForm.querySelector('.card-title').textContent = 'Create new profile'
     templateForm.querySelector('#form').appendChild(field_personal_id)
     templateForm.querySelector('#form').appendChild(create)
+    templateForm.querySelector('#form').dataset.id = 'action-2'
     console.log(templateForm.querySelector('#form'))
     clone = templateForm.cloneNode(True)
     fragment.appendChild(clone)
@@ -104,11 +107,11 @@ def update_delete():
     templateForm.querySelector('#form').appendChild(field_personal_id)
     templateForm.querySelector('#form').appendChild(update)
     templateForm.querySelector('#form').appendChild(delete)
+    templateForm.querySelector('#form').dataset.id = 'action-3'
     console.log(templateForm.querySelector('#form'))
     clone = templateForm.cloneNode(True)
     fragment.appendChild(clone)
     form_loc.appendChild(fragment)
-
 
 def proxy_container(e):
     global form_loc, templateForm
@@ -116,35 +119,34 @@ def proxy_container(e):
 
     if e.target.id == 'read-download':
         console.log(e.target.id)
-        templateForm.querySelector('#form').className = ''
         read_download()
-        templateForm.querySelector('#form').classList.add('action-1')
+
     elif e.target.id == 'create':
         console.log(e.target.id)
-        templateForm.querySelector('#form').className = ''
         create()
-        templateForm.querySelector('#form').classList.add('action-2')
     elif e.target.id == 'update-delete':
         console.log(e.target.id)
-        templateForm.querySelector('#form').className = ''
         update_delete()
-        templateForm.querySelector('#form').classList.add('action-3')
-
 
 
 async def search_data(e):
+    console.log('search_data')
     pass
 
 async def export_data(e):
+    console.log('export_data')
     pass
 
 async def create_data(e):
+    console.log('create_data')
     pass
 
 async def update_data(e):
+    console.log('update_data')
     pass
 
 async def delete_data(e):
+    console.log('delete_data')
     pass
 
 
@@ -153,19 +155,25 @@ def proxy_form_location(e):
     global templateForm
     console.log(e.target)
 
-    search = templateForm.querySelector('#search')
-    export = templateForm.querySelector('#export')
-    create = templateForm.querySelector('#create')
-    update = templateForm.querySelector('#update')
-    delete = templateForm.querySelector('#delete')
+    if e.target.parentElement.dataset.id == 'action-1':#TODO: no fuinciona
+        search = templateForm.querySelector('#search')
+        export = templateForm.querySelector('#export')
 
-    console.log(search)
+        search.addEventListener('click', create_proxy(search_data))
+        export.addEventListener('click', create_proxy(export_data))
 
-    # search.addEventListener('click', create_proxy(search_data))
-    # export.addEventListener('click', create_proxy(export_data))
-    # create.addEventListener('click', create_proxy(create_data))
-    # update.addEventListener('click', create_proxy(update_data))
-    # delete.addEventListener('click', create_proxy(delete_data))
+    elif e.target.parentElement.dataset.id == 'action-2':
+        create = templateForm.querySelector('#create')
+
+        create.addEventListener('click', create_proxy(create_data))
+
+    elif e.target.parentElement.dataset.id == 'action-3':
+        console.log(e.target.classList)
+        update = templateForm.querySelector('#update')
+        delete = templateForm.querySelector('#delete')
+
+        update.addEventListener('click', create_proxy(update_data))
+        delete.addEventListener('click', create_proxy(delete_data))
 
 
 
