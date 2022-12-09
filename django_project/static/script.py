@@ -24,7 +24,7 @@ async def make_request(url, method, body=None, headers=None):
 def create_field():
     field = document.createElement('input')
     field.type = 'text'
-    field.setAttribute('class', 'form-control')
+    field.setAttribute('class', 'form-control-sm mb-2 row')
     return field
 
 
@@ -36,7 +36,15 @@ def read_download():
     field_last_name = create_field()
     field_age = create_field()
     
+    field_personal_id.placeholder = 'id (* to match the rest)'
+    field_name.placeholder = "name"
+    field_last_name.placeholder = "last name"
+    field_age.placeholder = "age"
+
     
+    # field_personal_id.className += 'col-xs-4'
+    # field_personal_id.className += 'border border-primary'
+
     templateForm.querySelector('.card-title').textContent = 'Search and Export'
     templateForm.querySelector('#form').appendChild(field_personal_id)
     templateForm.querySelector('#form').appendChild(field_name)
@@ -49,10 +57,11 @@ def read_download():
 
     form_loc.appendChild(fragment)
 
+
 def create():
     global fragment, form_loc, templateForm
     field_personal_id = create_field()
-    field_personal_id.textContent = 'input exact id'
+    field_personal_id.placeholder = 'input exact id'
 
     templateForm.querySelector('.card-title').textContent = 'Create new profile'
     templateForm.querySelector('#form').appendChild(field_personal_id)
@@ -65,7 +74,7 @@ def create():
 def update_delete():
     global fragment, form_loc, templateForm
     field_personal_id = create_field()
-    field_personal_id.textContent = 'input exact id'
+    field_personal_id.placeholder = 'input exact id'
 
     templateForm.querySelector('.card-title').textContent = 'Update or Delete profile'
     templateForm.querySelector('#form').appendChild(field_personal_id)
@@ -75,7 +84,11 @@ def update_delete():
     form_loc.appendChild(fragment)
 
 def proxy_container(e):
+    global form_loc, templateForm
     console.log(e.target)
+
+    form_loc.textContent = ''
+    templateForm.querySelector('#form').textContent = ''
 
     if e.target.id == 'read-download':
         console.log(e.target.id)
@@ -90,7 +103,7 @@ def proxy_container(e):
 
 
 def main():
-    global templateForm, form_loc, templateButtons
+    global templateForm, form_loc, templateButtons, container
     global fragment
 
     container = document.querySelector('.container')
