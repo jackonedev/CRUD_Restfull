@@ -1,6 +1,6 @@
-# archivos personales
-
+# archivos y directorios personales
 *_.txt
+*contenido_generado*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
