@@ -29,7 +29,7 @@ def recta_y(age):
 
 def get_id(age):
     global counter
-    root_id = recta_y(age)
+    root_id = recta_y(age) * age
     plus = next(counter)
     return root_id + plus
     
@@ -56,8 +56,8 @@ def get_random_line(file_path):
         return random.choice(lines).rstrip()
 
 def get_random_name():
-    name = get_random_line('application/package/contenido_generado/nombres.txt')
-    last_name = get_random_line('application/package/contenido_generado/apellidos.txt')
+    name = get_random_line('django_project/rest_application/application_package/contenido_generado/nombres.txt')
+    last_name = get_random_line('django_project/rest_application/application_package/contenido_generado/apellidos.txt')
     return name, last_name
 
 
@@ -68,7 +68,6 @@ def main():
         print (">>>> Persona Random:")
         print(get_random_person())
         print()
-
 
 
 if __name__ == '__main__':
