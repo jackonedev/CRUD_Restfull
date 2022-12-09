@@ -1,8 +1,8 @@
 from django.urls import path
+from . import views
+
 
 app_name = 'api-rest'
-
-from . import views
 
 urlpatterns = [
     path('profiles/', views.get_post_profile, name='get_post'),
