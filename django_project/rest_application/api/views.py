@@ -1,4 +1,7 @@
+from django.shortcuts import render
+
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -8,22 +11,37 @@ from ..models import Profile
 from .serializers import ProfileSerializer
 
 
+class MyPagination(PageNumberPagination):
+    page_size = 10
+
 @api_view(['GET', 'POST'])
 def get_post_profile(request):
     if request.method == 'GET':
         try:
-            print ('ESTOY ENTRANDO A GET_QUERY_PARAMS')
             profiles = get_query_params(request, Profile)
-            print ('ESTOY FUERA DE GET_QUERY_PARAMS')
-            print (profiles)
             if profiles == 'not found':
                 return Response(status=status.HTTP_404_NOT_FOUND)
             elif profiles == 'bad request':
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         except:
             profiles = Profile.objects.all()
-        serializer = ProfileSerializer(profiles, many=True)
-        return Response(serializer.data)
+        
+        pagination_class = MyPagination()
+        paginated_queryset = pagination_class.paginate_queryset(profiles, request)
+        serializer = ProfileSerializer(paginated_queryset, many=True)
+        
+        # return Response(serializer.data)
+        try:
+            return pagination_class.get_paginated_response(serializer.data)
+        except: #TODO: enviar junto al request si se quiere ver la paginacion o no
+            context = {
+                'pagination_class': pagination_class,
+                'paginated_results': serializer.data
+                }
+            return render(request, 'profiles.html', context=context)
+
+
+
 
     elif request.method == 'POST':
         serializer = ProfileSerializer(data=request.data)
@@ -35,6 +53,11 @@ def get_post_profile(request):
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
