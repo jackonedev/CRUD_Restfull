@@ -26,20 +26,8 @@ def get_post_profile(request):
         except:
             profiles = Profile.objects.all()
         
-        pagination_class = MyPagination()
-        paginated_queryset = pagination_class.paginate_queryset(profiles, request)
-        serializer = ProfileSerializer(paginated_queryset, many=True)
+        serializer = ProfileSerializer(profiles, many=True)
         
-        # return Response(serializer.data)
-        try:
-            return pagination_class.get_paginated_response(serializer.data)
-        except: #TODO: enviar junto al request si se quiere ver la paginacion o no
-            context = {
-                'pagination_class': pagination_class,
-                'paginated_results': serializer.data
-                }
-            return render(request, 'profiles.html', context=context)
-
 
 
 
