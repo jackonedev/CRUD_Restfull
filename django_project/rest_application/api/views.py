@@ -12,7 +12,10 @@ from .serializers import ProfileSerializer
 def get_post_profile(request):
     if request.method == 'GET':
         try:
+            print ('ESTOY ENTRANDO A GET_QUERY_PARAMS')
             profiles = get_query_params(request, Profile)
+            print ('ESTOY FUERA DE GET_QUERY_PARAMS')
+            print (profiles)
             if profiles == 'not found':
                 return Response(status=status.HTTP_404_NOT_FOUND)
             elif profiles == 'bad request':

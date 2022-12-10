@@ -10,18 +10,19 @@ def get_query_params(request, model):
     # first search
     if id:
         if not id.startswith('*') and not id.endswith('*'):
-            profiles = model.objects.filter(id=id)
+            profiles = model.objects.filter(personal_id=id)
         elif id.startswith('*') and id.endswith('*'):
             id = id.replace('*', '')
-            profiles = model.objects.filter(id__icontains=id)
+            profiles = model.objects.filter(personal_id__icontains=id)
         elif id.startswith('*'):
             id = id.replace('*', '')
-            profiles = model.objects.filter(id__iendswith=id)
+            profiles = model.objects.filter(personal_id__iendswith=id)
         elif id.endswith('*'):
             id = id.replace('*', '')
-            profiles = model.objects.filter(id__istartswith=id)
+            profiles = model.objects.filter(personal_id__istartswith=id)
         if len(profiles) == 0:
             profiles = 'not found'
+        
         return profiles
 
     # second search
