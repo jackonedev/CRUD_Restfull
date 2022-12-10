@@ -7,17 +7,17 @@ from pyodide import create_proxy
 
 async def make_request(url, method, body=None, headers=None):
     
-    # csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
-    
     csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
-
-    console.log(f"csrf: {csrf}")
 
     default_headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrf
 }
+
+    if method != 'GET':
+        default_headers.update({
+            'X-CSRFToken': csrf
+})
 
     if headers:
         default_headers.update(headers)
@@ -177,7 +177,7 @@ async def search_data(e):
         url=url,
         method='GET'
     )
-    console.log(response)
+    console.log(json.dumps(response))
 
     # if response.get('errors'):
         # search for wich field is wrong
