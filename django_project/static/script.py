@@ -165,6 +165,7 @@ async def search_data(e):
     }
     
     data = {key: value for key, value in data.items() if value != ''}
+    console.log('data', str(data))
 
     url = 'http://localhost:8000/api/v1/profiles/?'
     for key, value in data.items():
@@ -177,7 +178,6 @@ async def search_data(e):
         url=url,
         method='GET'
     )
-    console.log(json.dumps(response))
 
     # if response.get('errors'):
         # search for wich field is wrong
@@ -191,7 +191,7 @@ async def search_data(e):
         # create the needed elements to show the results
         # append the elements to the form-results
         # pass
-    console.log('data', str(data))
+    console.log(json.dumps(response))
 async def export_data(e):
     console.log('export_data')
 
