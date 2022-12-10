@@ -27,13 +27,13 @@
             <tfoot>
                 <tr id="buttons">
                     <th class="col text-center">
-                        <button type="button" class="btn btn-primary btn-sm" id="read-download">GO!</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="read-download-form">GO!</button>
                     </th>
                     <th class="col text-center">
-                        <button type="button" class="btn btn-primary btn-sm" id="create">GO!</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="create-form">GO!</button>
                     </th>
                     <th class="col text-center">
-                        <button type="button" class="btn btn-primary btn-sm" id="update-delete">GO!</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="update-delete-form">GO!</button>
                     </th>
                 </tr>
             </tfoot>
@@ -41,6 +41,7 @@
     </div>
 
     <div id="form-loc">
+        {% csrf_token %}
     </div>
     
         
