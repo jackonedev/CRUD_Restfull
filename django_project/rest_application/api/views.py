@@ -63,3 +63,6 @@ def get_put_delete_profile(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+@api_view(['GET'])
+def download_csv(request):
+    pass
