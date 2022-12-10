@@ -13,6 +13,7 @@
     .row th+th[scope=row] { border-right: 1px dotted #666; }
     </style>
 <body>
+    {% csrf_token %}
     <div class="container">
         <h1 class="top-2 py-3">Profile Manager Interface</h1>
         <hr>
@@ -41,7 +42,7 @@
     </div>
 
     <div id="form-loc">
-        {% csrf_token %}
+        
     </div>
     
         
@@ -54,14 +55,23 @@
 
                 <center>
                     <div id="form">
+                        
                     </div>
                 </center>
                 
+                <center>
+                    <div id="result">
+                    </div>
+                </center>
+
             </div>
         </div>
     </template>
-    
-    
+
+    <template id="template-result-search">
+        <!-- {% include 'profiles.html' with profiles=profiles %} -->
+    </template>
+
 
 
     <py-script src="{% static 'script.py' %}"></py-script>
