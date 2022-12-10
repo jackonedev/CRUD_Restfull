@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 
 
 def valid_personal_id(value):
+    value = str(value)
     value = value.replace('-', '').replace('.', '')
     if not value.isdigit():
         raise ValidationError(f'Personal ID must be a number, not {value}')
