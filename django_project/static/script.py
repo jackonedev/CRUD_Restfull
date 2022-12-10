@@ -7,8 +7,10 @@ from pyodide import create_proxy
 
 async def make_request(url, method, body=None, headers=None):
     
-    csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
+    # csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
     
+    csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
+
     console.log(f"csrf: {csrf}")
 
     default_headers = {
@@ -147,7 +149,7 @@ def proxy_container(e):
     e.stopPropagation()
 
 
-def search_data(e):
+async def search_data(e):
     console.log('search_data')
     
     personal_id = document.querySelectorAll('.form-control-sm')[0].value
@@ -155,21 +157,27 @@ def search_data(e):
     last_name = document.querySelectorAll('.form-control-sm')[2].value
     age = document.querySelectorAll('.form-control-sm')[3].value
 
-    body = json.dumps({
+    data = {
         'id': personal_id,
         'name': name,
         'last_name': last_name,
         'age': age
-    })
+    }
     
+    data = {key: value for key, value in data.items() if value != ''}
+
+    url = 'http://localhost:8000/api/v1/profiles/?'
+    for key, value in data.items():
+        url += f'{key}={value}&'
+    url = url[:-1]
+
+    # console.log(url)
     
-    # response = await make_request(
-    #     url='',
-    #     method='',
-    #     headers='',
-    #     body=''
-    # )
-    # console.log(response)
+    response = await make_request(
+        url=url,
+        method='GET'
+    )
+    console.log(response)
 
     # if response.get('errors'):
         # search for wich field is wrong
@@ -183,8 +191,8 @@ def search_data(e):
         # create the needed elements to show the results
         # append the elements to the form-results
         # pass
-    console.log(body)
-def export_data(e):
+    console.log('data', str(data))
+async def export_data(e):
     console.log('export_data')
 
     personal_id = document.querySelectorAll('.form-control-sm')[0].value
@@ -206,7 +214,7 @@ def export_data(e):
     #     body=''
     # )
     console.log(body)
-def create_data(e):
+async def create_data(e):
     console.log('create_data')
     # console.log('1', e.target.parentElement)
 
@@ -229,7 +237,7 @@ def create_data(e):
     #     body=''
     # )
     console.log(body)
-def update_data(e):
+async def update_data(e):
     console.log('update_data')
 
     personal_id = document.querySelectorAll('.form-control-sm')[0].value
@@ -245,7 +253,7 @@ def update_data(e):
     #     body=''
     # )
     console.log(body)
-def delete_data(e):
+async def delete_data(e):
     console.log('delete_data')
 
     personal_id = document.querySelectorAll('.form-control-sm')[0].value
@@ -262,26 +270,26 @@ def delete_data(e):
     # )
     console.log(body)
 
-def proxy_form_location(e):
+async def proxy_form_location(e):
     global form_loc, templateForm
 
     action = templateForm.querySelector('#form').dataset.id
     button_id = e.target.id
 
     if action == 'action-1' and button_id == 'search':
-        search_data(e)
+        data = await search_data(e)
 
     elif action == 'action-1' and button_id == 'export':
-        export_data(e)
+        data = await export_data(e)
 
     elif action == 'action-2' and button_id == 'create':
-        create_data(e)
+        data = await create_data(e)
 
     elif action == 'action-3' and button_id == 'update':
-        update_data(e)
+        data = await update_data(e)
 
     elif action == 'action-3' and button_id == 'delete':
-        delete_data(e)
+        data = await delete_data(e)
 
     e.stopPropagation()
 
@@ -293,10 +301,8 @@ def main():
 
     container = document.querySelector('.container')
     form_loc = document.querySelector('#form-loc')
-    btn_loc = document.querySelector('#btn-loc')
     templateForm = document.getElementById('template-form').content
     
-
 
     container.addEventListener('click', create_proxy(proxy_container))
 
