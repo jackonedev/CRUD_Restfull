@@ -7,6 +7,10 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
 <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
 <title>CRUD RESTFUL</title>
+<py-env>
+    - pandas
+</py-env>
+
 </head>
 <style>
     .col th+th[scope=col] { border-right: 1px dotted #666; }
@@ -42,10 +46,10 @@
     </div>
 
     <div id="form-loc">
-        
     </div>
     
-        
+    <div id="response-loc">
+    </div>
     
 
     <template id="template-form">
@@ -68,8 +72,11 @@
         </div>
     </template>
 
-    <template id="template-result-search">
-        <!-- {% include 'profiles.html' with profiles=profiles %} -->
+    <template id="template-search-response">
+        <h5>Estoy en la zona de resultados</h5>
+        <div id="response">
+        </div>
+        <p>Acá arriba debería ver la botonera de paginación</p>
     </template>
 
 

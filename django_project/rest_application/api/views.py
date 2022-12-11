@@ -1,4 +1,7 @@
+from django.shortcuts import render
+
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -7,6 +10,9 @@ from ..application_package.get_query_params import get_query_params
 from ..models import Profile
 from .serializers import ProfileSerializer
 
+
+class MyPagination(PageNumberPagination):
+    page_size = 10
 
 @api_view(['GET', 'POST'])
 def get_post_profile(request):
@@ -20,7 +26,23 @@ def get_post_profile(request):
         except:
             profiles = Profile.objects.all()
         
-        serializer = ProfileSerializer(profiles, many=True)
+        pagination_class = MyPagination()
+        paginated_queryset = pagination_class.paginate_queryset(profiles, request)
+        serializer = ProfileSerializer(paginated_queryset, many=True)
+        
+        # return Response(serializer.data)
+        try:
+            return pagination_class.get_paginated_response(serializer.data)
+        
+        except: #TODO: aun no entiendo si puedo renderizar el front y al mismo tiempo enviar una response
+            context = {
+                'pagination_class': pagination_class,
+                'paginated_results': serializer.data
+                }
+            return render(request, 'profiles.html', context=context)
+
+
+
 
     elif request.method == 'POST':
         serializer = ProfileSerializer(data=request.data)
@@ -32,6 +54,7 @@ def get_post_profile(request):
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 @api_view(['GET', 'PUT', 'DELETE'])

@@ -4,6 +4,24 @@ import json
 from pyodide.http import pyfetch
 from pyodide import create_proxy
 
+import pandas as pd
+
+def create_field(id=None):
+    field = document.createElement('input')
+    field.type = 'text'
+    field.setAttribute('class', 'form-control-sm mb-2 row')
+
+    if id:
+        field.id = id
+    return field
+def create_button(textContent, id, class_name):
+
+    button = document.createElement('button')
+    button.type = 'button'
+    button.textContent = textContent
+    button.id = id
+    button.setAttribute('class', class_name)
+    return button
 
 async def make_request(url, method, body=None, headers=None):
     
@@ -29,24 +47,6 @@ async def make_request(url, method, body=None, headers=None):
         headers=default_headers
 )
     return await response.json()
-
-
-def create_field(id=None):
-    field = document.createElement('input')
-    field.type = 'text'
-    field.setAttribute('class', 'form-control-sm mb-2 row')
-
-    if id:
-        field.id = id
-    return field
-
-def create_button(textContent, id, class_name):
-    button = document.createElement('button')
-    button.type = 'button'
-    button.textContent = textContent
-    button.id = id
-    button.setAttribute('class', class_name)
-    return button
 
 
 def read_download_form():
@@ -149,7 +149,21 @@ def proxy_container(e):
     e.stopPropagation()
 
 
+def search_template():
+    global templateSearchResponse, fragment, response_loc
+    global searchResponse, searchNormalizedResponse
+    templateSearchResponse.querySelector('h5').textContent = 'Hola mundo tranqui!'
+    
+    console.log('ESTOY EN SEARCH TEMPLATE')
+    console.log(str(searchResponse.to_dict))
+    console.log(str(searchNormalizedResponse.to_dict))
+    clone = templateSearchResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)
+
 async def search_data(e):
+    global searchResponse, searchNormalizedResponse
+
     console.log('search_data')
     
     personal_id = document.querySelectorAll('.form-control-sm')[0].value
@@ -167,31 +181,43 @@ async def search_data(e):
     data = {key: value for key, value in data.items() if value != ''}
     console.log('data', str(data))
 
-    url = 'http://localhost:8000/api/v1/profiles/?'
+    url = 'http://localhost:8000/api/v1/profiles/?page=1&'
     for key, value in data.items():
         url += f'{key}={value}&'
     url = url[:-1]
-
     # console.log(url)
+
     
     response = await make_request(
         url=url,
         method='GET'
     )
+    console.log(json.dumps(response))
 
-    # if response.get('errors'):
+
+    # console.log(json.dumps(response['count']))
+
+
+    if response.get('errors'):
         # search for wich field is wrong
         # console.log(templateForm.querySelector('#form'))   <--- TODO: cambiar class a este elemento
         # add a classList with 'is-invalid' to the field
         # show error message
-    #     pass
-    # else:
+        pass
+    else:
         # change classList = 'form-control form-control-sm is-valid'
         # get element of the new form-results id
         # create the needed elements to show the results
         # append the elements to the form-results
-        # pass
-    console.log(json.dumps(response))
+
+
+        searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]]
+        # searchNormalizedResponse = pd.json_normalize(json.dumps(response), record_path=['results'])
+        searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
+        search_template()
+
+
+
 async def export_data(e):
     console.log('export_data')
 
@@ -294,19 +320,33 @@ async def proxy_form_location(e):
     e.stopPropagation()
 
 
+async def proxy_result_location(e):
+    console.log('proxy_result_location')
+
 def main():
+    # created in HTML
     global container, templateForm, form_loc
-    global fragment
+    global templateSearchResponse, response_loc
+
+    # created localy
+    global fragment, searchResponse, searchNormalizedResponse
+
     fragment = document.createDocumentFragment()
+    searchResponse = pd.DataFrame()
+    searchNormalizedResponse = pd.DataFrame()
 
     container = document.querySelector('.container')
     form_loc = document.querySelector('#form-loc')
+    response_loc = document.querySelector('#response-loc')
     templateForm = document.getElementById('template-form').content
+    templateSearchResponse = document.getElementById('template-search-response').content
     
 
     container.addEventListener('click', create_proxy(proxy_container))
 
     form_loc.addEventListener('click', create_proxy(proxy_form_location))
+
+    response_loc.addEventListener('click', create_proxy(proxy_result_location))
 
 
 main()
