@@ -16,7 +16,7 @@
 <style>
     .col th+th[scope=col] { border-right: 1px dotted #666; }
     .row th+th[scope=row] { border-right: 1px dotted #666; }
-    </style>
+</style>
 <body>
     {% csrf_token %}
     <div class="container">
@@ -85,10 +85,11 @@
                     </thead>
                     <tbody id="response">
                     </tbody>
-
-                    <tfoot id="buttons">
-                    </tfoot>
                 </table>
+
+                <div id="search-buttons" class="col text-right">
+                </div>
+                
             </div>
         </div>
     </template>
