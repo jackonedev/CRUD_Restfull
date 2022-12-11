@@ -5,6 +5,7 @@ from pyodide.http import pyfetch
 from pyodide import create_proxy
 
 import pandas as pd
+import numpy as np
 
 def create_field(id=None):
     field = document.createElement('input')
@@ -14,13 +15,13 @@ def create_field(id=None):
     if id:
         field.id = id
     return field
-def create_button(textContent, id, class_name):
+def create_button(textContent, id, className):
 
     button = document.createElement('button')
     button.type = 'button'
     button.textContent = textContent
     button.id = id
-    button.setAttribute('class', class_name)
+    button.setAttribute('class', className)
     return button
 
 async def make_request(url, method, body=None, headers=None):
@@ -132,18 +133,20 @@ def update_delete_form():
     form_loc.appendChild(fragment)
 
 def proxy_container(e):
-    global form_loc, templateForm
-    console.log(e.target)
+    global form_loc, templateForm, response_loc
+
+    if e.target.id == 'read-download-form' or e.target.id == 'create-form' or e.target.id == 'update-delete-form':
+        console.log(e.target)
+        console.log(e.target.id)
+        response_loc.textContent = ''
 
     if e.target.id == 'read-download-form':
-        console.log(e.target.id)
         read_download_form()
 
     elif e.target.id == 'create-form':
-        console.log(e.target.id)
         create_form()
+        
     elif e.target.id == 'update-delete-form':
-        console.log(e.target.id)
         update_delete_form()
     
     e.stopPropagation()
@@ -152,16 +155,41 @@ def proxy_container(e):
 def search_template():
     global templateSearchResponse, fragment, response_loc
     global searchResponse, searchNormalizedResponse
-    templateSearchResponse.querySelector('h5').textContent = 'Hola mundo tranqui!'
     
-    console.log('ESTOY EN SEARCH TEMPLATE')
+    response_loc.textContent = ''
+
+    templateSearchResponse.querySelector('h5').textContent = 'Se encontraron {} resultados'.format(searchResponse['count'].values[0])
+    
+    console.log('SEARCH TEMPLATE DATA')
     console.log(str(searchResponse.to_dict))
     console.log(str(searchNormalizedResponse.to_dict))
+
+    templateSearchResponse.querySelector('#response').innerHTML = searchNormalizedResponse.to_html(index=True, header=False)
+    
+
+    if str(searchResponse['previous'].values[0]) != 'nan':
+        previous = create_button(textContent='previous', id='previous', className='btn btn-sm mx-2')
+        console.log(previous)
+        templateSearchResponse.querySelector('#buttons').appendChild(previous)
+    if str(searchResponse['next'].values[0]) != 'nan':
+        next = create_button(textContent='Next', id='next', className='btn btn-sm mx-2')
+        console.log(next)
+        templateSearchResponse.querySelector('#buttons').appendChild(next)
+
+
     clone = templateSearchResponse.cloneNode(True)
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)
+    
 
 async def search_data(e):
+    """
+    Acá envía la request tomando informacion de los campos de formulario
+    Atrapa los errores
+    o
+    Devuelve dos datasets con la respuesta de la request
+    Y ejecuta la acción de renderizar la respuesta    
+    """
     global searchResponse, searchNormalizedResponse
 
     console.log('search_data')
@@ -211,12 +239,10 @@ async def search_data(e):
         # append the elements to the form-results
 
 
-        searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]]
-        # searchNormalizedResponse = pd.json_normalize(json.dumps(response), record_path=['results'])
+        searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]].to_frame().T
         searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
+        searchNormalizedResponse.index += 1
         search_template()
-
-
 
 async def export_data(e):
     console.log('export_data')
@@ -320,8 +346,16 @@ async def proxy_form_location(e):
     e.stopPropagation()
 
 
+async def change_page(e, forward):
+    console.log('change_page')
+
 async def proxy_result_location(e):
     console.log('proxy_result_location')
+    console.log('\n', e.target)
+
+    if e.target.id == 'next':
+        console.log('next')
+        data = await change_page(e, forward=True)
 
 def main():
     # created in HTML

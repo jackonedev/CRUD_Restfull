@@ -12,7 +12,7 @@ from .serializers import ProfileSerializer
 
 
 class MyPagination(PageNumberPagination):
-    page_size = 10
+    page_size = 5
 
 @api_view(['GET', 'POST'])
 def get_post_profile(request):

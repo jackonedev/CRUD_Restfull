@@ -8,6 +8,7 @@
 <script defer src="https://pyscript.net/alpha/pyscript.js"></script>
 <title>CRUD RESTFUL</title>
 <py-env>
+    - numpy
     - pandas
 </py-env>
 
@@ -62,21 +63,34 @@
                         
                     </div>
                 </center>
-                
-                <center>
-                    <div id="result">
-                    </div>
-                </center>
 
             </div>
         </div>
     </template>
 
     <template id="template-search-response">
-        <h5>Estoy en la zona de resultados</h5>
-        <div id="response">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5>Estoy en la zona de resultados</h5>
+                
+                <table class="table text-center">
+                    <thead>
+                        <tr>
+                            <th> i </th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Last Name</th>
+                            <th>Age</th>
+                        </tr>
+                    </thead>
+                    <tbody id="response">
+                    </tbody>
+
+                    <tfoot id="buttons">
+                    </tfoot>
+                </table>
+            </div>
         </div>
-        <p>Acá arriba debería ver la botonera de paginación</p>
     </template>
 
 
