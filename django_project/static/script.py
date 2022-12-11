@@ -6,6 +6,7 @@ from pyodide import create_proxy
 
 import pandas as pd
 import numpy as np
+from itertools import count
 
 def create_field(id=None):
     field = document.createElement('input')
@@ -152,45 +153,46 @@ def proxy_container(e):
     e.stopPropagation()
 
 
-def search_template():
+async def search_template():
+    """
+    Esta función se encarga de crear el template ante la respuesta de presionar el botón "search"
+    """
     global templateSearchResponse, fragment, response_loc
     global searchResponse, searchNormalizedResponse
     
     response_loc.textContent = ''
+    templateSearchResponse.querySelector('#response').textContent = ''
+    templateSearchResponse.querySelector('#search-buttons').textContent = ''
 
     templateSearchResponse.querySelector('h5').textContent = 'Se encontraron {} resultados'.format(searchResponse['count'].values[0])
     
-    console.log('SEARCH TEMPLATE DATA')
-    console.log(str(searchResponse.to_dict))
-    console.log(str(searchNormalizedResponse.to_dict))
+    console.log('Search Template')
+    console.log(searchResponse.to_string())
+    console.log(searchNormalizedResponse.to_string())
 
     templateSearchResponse.querySelector('#response').innerHTML = searchNormalizedResponse.to_html(index=True, header=False)
-    
 
     if str(searchResponse['previous'].values[0]) != 'nan':
-        previous = create_button(textContent='previous', id='previous', className='btn btn-sm mx-2')
-        console.log(previous)
-        templateSearchResponse.querySelector('#buttons').appendChild(previous)
+        previous = create_button(textContent='Previous Page', id='previous', className='btn btn-link btn-sm shadow m-2 p1 border border-primary')
+        templateSearchResponse.querySelector('#search-buttons').appendChild(previous)
     if str(searchResponse['next'].values[0]) != 'nan':
-        next = create_button(textContent='Next', id='next', className='btn btn-sm mx-2')
-        console.log(next)
-        templateSearchResponse.querySelector('#buttons').appendChild(next)
-
+        next = create_button(textContent='Next Page', id='next', className='btn btn-link btn-sm shadow m-2 p1 border border-primary')
+        templateSearchResponse.querySelector('#search-buttons').appendChild(next)
 
     clone = templateSearchResponse.cloneNode(True)
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)
-    
-
 async def search_data(e):
     """
     Acá envía la request tomando informacion de los campos de formulario
     Atrapa los errores
     o
     Devuelve dos datasets con la respuesta de la request
-    Y ejecuta la acción de renderizar la respuesta    
+    Y ejecuta la acción de renderizar la respuesta en la función "search_template"   
     """
-    global searchResponse, searchNormalizedResponse
+    global searchResponse, searchNormalizedResponse, x
+
+    x = 0
 
     console.log('search_data')
     
@@ -220,10 +222,8 @@ async def search_data(e):
         url=url,
         method='GET'
     )
-    console.log(json.dumps(response))
+    # console.log(json.dumps(response))
 
-
-    # console.log(json.dumps(response['count']))
 
 
     if response.get('errors'):
@@ -242,7 +242,7 @@ async def search_data(e):
         searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]].to_frame().T
         searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
         searchNormalizedResponse.index += 1
-        search_template()
+        await search_template()
 
 async def export_data(e):
     console.log('export_data')
@@ -323,37 +323,80 @@ async def delete_data(e):
     console.log(body)
 
 async def proxy_form_location(e):
-    global form_loc, templateForm
+    global templateForm
 
     action = templateForm.querySelector('#form').dataset.id
     button_id = e.target.id
 
     if action == 'action-1' and button_id == 'search':
+        console.log(e.target)
         data = await search_data(e)
 
     elif action == 'action-1' and button_id == 'export':
+        console.log(e.target)
         data = await export_data(e)
 
     elif action == 'action-2' and button_id == 'create':
+        console.log(e.target)
         data = await create_data(e)
 
     elif action == 'action-3' and button_id == 'update':
+        console.log(e.target)
         data = await update_data(e)
 
     elif action == 'action-3' and button_id == 'delete':
+        console.log(e.target)
         data = await delete_data(e)
 
     e.stopPropagation()
 
 
 async def change_page(e, forward):
+    """
+    Esta función se encarga de hacer el request con la nueva página
+    """
+    global searchResponse, searchNormalizedResponse, x
     console.log('change_page')
+    
+    if forward:
+        console.log('forward')
+        response = await make_request(
+        url=searchResponse['next'][0],
+        method='GET'
+    )
 
-async def proxy_result_location(e):
-    console.log('proxy_result_location')
-    console.log('\n', e.target)
+    else:
+        console.log('back')
+        response = await make_request(
+        url=searchResponse['previous'][0],
+        method='GET'
+    )
+    console.log(json.dumps(response))
 
-    if e.target.id == 'next':
+    searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]].to_frame().T
+    searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
+    searchNormalizedResponse.index += 1
+    if forward:
+        x += 1
+        searchNormalizedResponse.index += (5 * x)
+    else:
+        x -= 1
+        searchNormalizedResponse.index += (5 * x)
+
+    await search_template()
+
+async def proxy_response_location(e):
+    global templateSearchResponse, response_loc
+
+    if e.target.id == 'previous' or e.target.id == 'next':
+        console.log(e.target)
+        # response_loc.textContent = ''
+
+    if e.target.id == 'previous':
+        console.log('previous')
+        data = await change_page(e, forward=False)
+
+    elif e.target.id == 'next':
         console.log('next')
         data = await change_page(e, forward=True)
 
@@ -363,8 +406,9 @@ def main():
     global templateSearchResponse, response_loc
 
     # created localy
-    global fragment, searchResponse, searchNormalizedResponse
+    global fragment, searchResponse, searchNormalizedResponse, x
 
+    x = 0
     fragment = document.createDocumentFragment()
     searchResponse = pd.DataFrame()
     searchNormalizedResponse = pd.DataFrame()
@@ -380,7 +424,7 @@ def main():
 
     form_loc.addEventListener('click', create_proxy(proxy_form_location))
 
-    response_loc.addEventListener('click', create_proxy(proxy_result_location))
+    response_loc.addEventListener('click', create_proxy(proxy_response_location))
 
 
 main()
