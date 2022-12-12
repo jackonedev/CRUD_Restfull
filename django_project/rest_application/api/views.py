@@ -1,6 +1,5 @@
 import csv, json
 
-from django.shortcuts import render
 from django.http import HttpResponse
 
 from rest_framework.decorators import api_view
@@ -17,6 +16,7 @@ from .serializers import ProfileSerializer
 class MyPagination(PageNumberPagination):
     page_size = 5
 
+
 @api_view(['GET', 'POST'])
 def get_post_profile(request):
     if request.method == 'GET':
@@ -28,33 +28,13 @@ def get_post_profile(request):
                 return Response(status=status.HTTP_400_BAD_REQUEST)
         except:
             profiles = Profile.objects.all()
-        
         pagination_class = MyPagination()
         paginated_queryset = pagination_class.paginate_queryset(profiles, request)
         serializer = ProfileSerializer(paginated_queryset, many=True)
-        
-        # return Response(serializer.data)
-        try:
-            return pagination_class.get_paginated_response(serializer.data)
-        
-        except: #TODO: aun no entiendo si puedo renderizar el front y al mismo tiempo enviar una response
-            context = {
-                'pagination_class': pagination_class,
-                'paginated_results': serializer.data
-                }
-            return render(request, 'profiles.html', context=context)
-
-
-
+        return pagination_class.get_paginated_response(serializer.data)
 
     elif request.method == 'POST':
         serializer = ProfileSerializer(data=request.data)
-
-        print ('Ingresando a view')
-        print (request.headers)
-        print ('requests.headers!')
-
-
         if serializer.is_valid():
             data = serializer.validated_data
             data['personal_id'] = data['personal_id'].replace('-', '').replace('.', '')
@@ -64,12 +44,10 @@ def get_post_profile(request):
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-        if request.headers['Manage'] == 'True':
-            return Response({'errors': serializer.errors})
+        if 'Manage' in request.headers:
+            if request.headers['Manage'] == 'True':
+                return Response({'errors': serializer.errors})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -108,10 +86,8 @@ def download_csv(request):
     writer = csv.writer(response)
     writer.writerow(['personal_id', 'name', 'last_name', 'age'])
 
-
     profiles = get_query_params(request, Profile)
 
     for row in profiles:
         writer.writerow([row.personal_id, row.name, row.last_name, row.age])
-
     return response
