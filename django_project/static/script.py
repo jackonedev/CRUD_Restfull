@@ -272,25 +272,36 @@ async def create_data(e):
     console.log('create_data')
     # console.log('1', e.target.parentElement)
 
-    personal_id = document.querySelectorAll('.form-control-sm')[0].value
-    name = document.querySelectorAll('.form-control-sm')[1].value
-    last_name = document.querySelectorAll('.form-control-sm')[2].value
-    age = document.querySelectorAll('.form-control-sm')[3].value
+    personal_id_input = document.querySelectorAll('.form-control-sm')[0].value
+    name_input = document.querySelectorAll('.form-control-sm')[1].value
+    last_name_input = document.querySelectorAll('.form-control-sm')[2].value
+    age_input = document.querySelectorAll('.form-control-sm')[3].value
 
-    body = json.dumps({
-        'id': personal_id,
-        'name': name,
-        'last_name': last_name,
-        'age': age
-    })
+    personal_id = document.getElementById('id')
+    name = document.getElementById('name')
+    last_name = document.getElementById('last_name')
+    age = document.getElementById('age')
     
-    # response = await make_request(
-    #     url='api/v1/profiles/',
-    #     method='GET',
-    #     headers='',
-    #     body=''
-    # )
-    console.log(body)
+    data = {
+        'id': personal_id_input,
+        'name': name_input,
+        'last_name': last_name_input,
+        'age': age_input
+    }
+    
+    url = 'http://localhost:8000/api/v1/profiles/'
+    
+    body = json.dumps(data)
+    
+    response = await make_request(
+        url=url,
+        method='POST',
+        body=body
+    )
+    
+    if response.get('errors'):
+        pass
+
 async def update_data(e):
     console.log('update_data')
 
