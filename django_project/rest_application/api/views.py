@@ -1,4 +1,4 @@
-import csv
+import csv, json
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -49,13 +49,25 @@ def get_post_profile(request):
 
     elif request.method == 'POST':
         serializer = ProfileSerializer(data=request.data)
+
+        print ('Ingresando a view')
+        print (request.headers)
+        print ('requests.headers!')
+
+
         if serializer.is_valid():
             data = serializer.validated_data
             data['personal_id'] = data['personal_id'].replace('-', '').replace('.', '')
+            data['name'] = data['name'].title()
+            data['last_name'] = data['last_name'].title()
             serializer = ProfileSerializer(data=data)
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+        if request.headers['Manage'] == 'True':
+            return Response({'errors': serializer.errors})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

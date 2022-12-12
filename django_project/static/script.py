@@ -1,8 +1,8 @@
 from js import document, console
 import json
 # import asyncio
-from pyodide.http import pyfetch
 from pyodide import create_proxy
+from pyodide.http import pyfetch
 
 import pandas as pd
 import numpy as np
@@ -25,6 +25,7 @@ def create_button(textContent, id, className):
     button.setAttribute('class', className)
     return button
 
+
 async def make_request(url, method, body=None, headers=None):
     
     csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
@@ -32,7 +33,8 @@ async def make_request(url, method, body=None, headers=None):
     default_headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
-        'X-CSRFToken': csrf
+        'X-CSRFToken': csrf,
+        'Manage': 'False'
 }
 
     if headers:
@@ -44,6 +46,17 @@ async def make_request(url, method, body=None, headers=None):
         body=body,
         headers=default_headers
 )
+    
+    if not 200 <= response.status < 300:
+        default_headers.update({'Manage': 'True'})
+        response = await pyfetch(
+            url=url,
+            method=method,
+            body=body,
+            headers=default_headers
+    )
+        return await response.json()
+
     return await response.json()
 
 
@@ -277,30 +290,35 @@ async def create_data(e):
     last_name_input = document.querySelectorAll('.form-control-sm')[2].value
     age_input = document.querySelectorAll('.form-control-sm')[3].value
 
-    personal_id = document.getElementById('id')
-    name = document.getElementById('name')
-    last_name = document.getElementById('last_name')
-    age = document.getElementById('age')
-    
     data = {
-        'id': personal_id_input,
+        'personal_id': personal_id_input,
         'name': name_input,
         'last_name': last_name_input,
         'age': age_input
     }
     
     url = 'http://localhost:8000/api/v1/profiles/'
-    
     body = json.dumps(data)
     
+
     response = await make_request(
         url=url,
         method='POST',
         body=body
     )
     
+    personal_id = document.getElementById('id')
+    name = document.getElementById('name')
+    last_name = document.getElementById('last_name')
+    age = document.getElementById('age')
+    
+    
     if response.get('errors'):
-        pass
+        errors = response.get('errors')
+        for field in errors.keys():
+            console.log(str(field), str(errors[field]))
+    else:
+        console.log('request OK')
 
 async def update_data(e):
     console.log('update_data')

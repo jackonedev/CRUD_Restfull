@@ -11,7 +11,7 @@ def valid_personal_id(value):
 
 def valid_name(value):
     if not value.isalpha():
-        raise ValidationError(f'Name must be a string, not {value}')
+        raise ValidationError(f'Name and Last Name must be a string, not {value}')
     return value
 
 def valid_age(value):
