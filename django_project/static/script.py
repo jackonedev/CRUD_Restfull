@@ -32,12 +32,8 @@ async def make_request(url, method, body=None, headers=None):
     default_headers = {
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
+        'X-CSRFToken': csrf
 }
-
-    if method != 'GET':
-        default_headers.update({
-            'X-CSRFToken': csrf
-})
 
     if headers:
         default_headers.update(headers)
@@ -67,8 +63,9 @@ def read_download_form():
     field_age.placeholder = "age"
 
     search = create_button('Search', 'search', 'btn btn-primary btn-sm mx-2')
-    export = create_button('Export', 'export', 'btn btn-primary btn-sm mx-2')
-    
+    export = create_button('Export', 'export', 'btn btn-primary btn-sm mx-2')#TODO: checkear export data
+
+
     templateForm.querySelector('.card-title').textContent = 'Search and Export'
     templateForm.querySelector('#form').dataset.id = 'action-1'
     templateForm.querySelector('#form').appendChild(field_personal_id)
@@ -209,7 +206,7 @@ async def search_data(e):
     }
     
     data = {key: value for key, value in data.items() if value != ''}
-    console.log('data', str(data))
+    # console.log('data', str(data))
 
     url = 'http://localhost:8000/api/v1/profiles/?page=1&'
     for key, value in data.items():
@@ -252,20 +249,25 @@ async def export_data(e):
     last_name = document.querySelectorAll('.form-control-sm')[2].value
     age = document.querySelectorAll('.form-control-sm')[3].value
 
-    body = json.dumps({
+    data = {
         'id': personal_id,
         'name': name,
         'last_name': last_name,
         'age': age
-    })
+    }
+    data = {key: value for key, value in data.items() if value != ''}
 
-    # response = await make_request(
-    #     url='',
-    #     method='',
-    #     headers='',
-    #     body=''
-    # )
-    console.log(body)
+    url = 'http://localhost:8000/api/v1/contents/?'
+    for key, value in data.items():
+        url += f'{key}={value}&'
+    url = url[:-1]
+
+    a = document.createElement('a')
+    a.href = url
+    a.download = 'export.csv'
+    a.click()
+
+
 async def create_data(e):
     console.log('create_data')
     # console.log('1', e.target.parentElement)

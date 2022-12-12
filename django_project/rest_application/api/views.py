@@ -1,4 +1,7 @@
+import csv
+
 from django.shortcuts import render
+from django.http import HttpResponse
 
 from rest_framework.decorators import api_view
 from rest_framework.pagination import PageNumberPagination
@@ -88,4 +91,15 @@ def get_put_delete_profile(request, pk):
 
 @api_view(['GET'])
 def download_csv(request):
-    pass
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="download-profiles.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['personal_id', 'name', 'last_name', 'age'])
+
+
+    profiles = get_query_params(request, Profile)
+
+    for row in profiles:
+        writer.writerow([row.personal_id, row.name, row.last_name, row.age])
+
+    return response
