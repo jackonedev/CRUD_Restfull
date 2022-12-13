@@ -1,28 +1,28 @@
 def get_query_params(request, model):
-    id = request.query_params.get('id', None)
-    name = request.query_params.get('name', None)
-    last_name = request.query_params.get('last_name', None)
-    age = request.query_params.get('age', None)
+    id = request.query_params.get("id", None)
+    name = request.query_params.get("name", None)
+    last_name = request.query_params.get("last_name", None)
+    age = request.query_params.get("age", None)
 
     if not (name or last_name or age or id):
-        return 1/0
+        return 1 / 0
 
     # first search
     if id:
-        if not id.startswith('*') and not id.endswith('*'):
+        if not id.startswith("*") and not id.endswith("*"):
             profiles = model.objects.filter(personal_id=id)
-        elif id.startswith('*') and id.endswith('*'):
-            id = id.replace('*', '')
+        elif id.startswith("*") and id.endswith("*"):
+            id = id.replace("*", "")
             profiles = model.objects.filter(personal_id__icontains=id)
-        elif id.startswith('*'):
-            id = id.replace('*', '')
+        elif id.startswith("*"):
+            id = id.replace("*", "")
             profiles = model.objects.filter(personal_id__iendswith=id)
-        elif id.endswith('*'):
-            id = id.replace('*', '')
+        elif id.endswith("*"):
+            id = id.replace("*", "")
             profiles = model.objects.filter(personal_id__istartswith=id)
         if len(profiles) == 0:
-            profiles = 'not found'
-        
+            profiles = "not found"
+
         return profiles
 
     # second search
@@ -50,11 +50,11 @@ def get_query_params(request, model):
         elif age:
             profiles = model.objects.filter(age=age)
         else:
-            profiles = 'not found'
+            profiles = "not found"
         if len(profiles) == 0:
-            profiles = 'not found'
+            profiles = "not found"
         return profiles
-    
+
     except:
-        profile = 'bad request'
+        profile = "bad request"
         return profile

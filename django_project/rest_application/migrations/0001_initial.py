@@ -8,17 +8,40 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Profile',
+            name="Profile",
             fields=[
-                ('personal_id', models.CharField(max_length=50, primary_key=True, serialize=False, unique=True, validators=[rest_application.models.valid_personal_id])),
-                ('name', models.CharField(max_length=50, validators=[rest_application.models.valid_name])),
-                ('last_name', models.CharField(max_length=50, validators=[rest_application.models.valid_name])),
-                ('age', models.PositiveIntegerField(validators=[rest_application.models.valid_age])),
+                (
+                    "personal_id",
+                    models.CharField(
+                        max_length=50,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                        validators=[rest_application.models.valid_personal_id],
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=50, validators=[rest_application.models.valid_name]
+                    ),
+                ),
+                (
+                    "last_name",
+                    models.CharField(
+                        max_length=50, validators=[rest_application.models.valid_name]
+                    ),
+                ),
+                (
+                    "age",
+                    models.PositiveIntegerField(
+                        validators=[rest_application.models.valid_age]
+                    ),
+                ),
             ],
         ),
     ]

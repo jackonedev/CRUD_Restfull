@@ -6,8 +6,8 @@ from django.conf.urls.static import static
 from . import views
 
 
-app_name = 'frontend'
+app_name = "frontend"
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path("", views.index, name="index"),
 ]
