@@ -51,7 +51,7 @@ async def make_request(url, method, body=None, headers=None):
         default_headers.update({'ManageAssert': 'True'})
         response = await pyfetch(
             url=url,
-            method='GET',
+            method=method,
             body=body,
             headers=default_headers
     )
@@ -337,50 +337,72 @@ async def create_data(e):
         for field in errors.keys():
             console.log(str(field), str(errors[field]))
 
-
-
-
-
     else:
         console.log('request OK')
         create_template()
+
+def errors_template(errors):
+    pass
 
 
 async def update_data(e):
     console.log('update_data')
 
-    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+    personal_id = document.querySelectorAll('.form-control-sm')[0]
+    personal_id_input = personal_id.value
 
-    body = json.dumps({
-        'id': personal_id,
-    })
+    if personal_id_input == '':
+        personal_id.setAttribute('required',True)
+        personal_id.classList.add('is-invalid')
+        errors = {'personal_id': 'This field is required.'}
+        return errors_template(errors)
 
-    # response = await make_request(
-    #     url='',
-    #     method='',
-    #     headers='',
-    #     body=''
-    # )
-    console.log(body)
+    response = await make_request(
+        url='http://localhost:8000/api/v1/profiles/{}/'.format(personal_id_input),
+        method='GET'
+    )
+    console.log(str(response))
+
+    if response.get('errors'):
+        personal_id.classList.add('invalid')
+    else:
+        console.log('request OK')
+        personal_id.classList.add('valid')
+
+def delete_template():
+    pass
 async def delete_data(e):
     console.log('delete_data')
 
-    personal_id = document.querySelectorAll('.form-control-sm')[0].value
+    personal_id = document.querySelectorAll('.form-control-sm')[0]
+    personal_id_input = personal_id.value
 
-    body = json.dumps({
-        'id': personal_id,
-    })
+    console.log('personal_id_value:', str(personal_id_input==''))
 
-    # response = await make_request(
-    #     url='',
-    #     method='',
-    #     headers='',
-    #     body=''
-    # )
-    console.log(body)
+    if personal_id_input == '':
+        personal_id.className = 'invalid'
+        # personal_id.className = 'is-invalid'
+        return
+
+    response = await make_request(
+        url='http://localhost:8000/api/v1/profiles/{}/'.format(personal_id_input),
+        method='GET'
+    )
+    console.log(str(response))
+
+    if response.get('errors'):
+        errors = response.get('errors')
+        for field in errors.keys():
+            console.log(str(field), str(errors[field]))
+
+    else:
+        console.log('request OK')
+        delete_template()
 
 async def proxy_form_location(e):
     global templateForm
+
+    console.log(e.target)#TODO: borrar
 
     action = templateForm.querySelector('#form').dataset.id
     button_id = e.target.id
@@ -440,7 +462,7 @@ async def change_page(e, forward):
         x -= 1
         searchNormalizedResponse.index += (5 * x)
 
-    await search_template()
+    search_template()
 
 async def proxy_response_location(e):
     global templateSearchResponse, response_loc
