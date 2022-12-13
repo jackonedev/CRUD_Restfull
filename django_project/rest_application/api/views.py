@@ -44,16 +44,23 @@ def get_post_profile(request):
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if 'Manage' in request.headers:
-            if request.headers['Manage'] == 'True':
+        if 'ManageAssert' in request.headers:
+            if request.headers['ManageAssert'] == 'True':
                 return Response({'errors': serializer.errors})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def get_put_delete_profile(request, pk):
+    
+    if 'ManageAssert' in request.headers:
+        if request.headers['ManageAssert'] == 'True':
+            return Response({'errors': 'invalid ID'})
+    
     if not pk.isdigit():
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
     try:
         profile = Profile.objects.get(pk=pk)
     except Profile.DoesNotExist:
