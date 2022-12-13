@@ -1,24 +1,6 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
-
-def valid_personal_id(value):
-    value = str(value)
-    value = value.replace('-', '').replace('.', '')
-    if not value.isdigit():
-        raise ValidationError(f'Personal ID must be a number, not {value}')
-    return value
-
-def valid_name(value):
-    if not value.isalpha():
-        raise ValidationError(f'Name and Last Name must be a string, not {value}')
-    return value
-
-def valid_age(value):
-    value = str(value)
-    if not value.isdigit():
-        raise ValidationError(f'Age must be a number, not {value}')
-    return value
+from .validators import valid_personal_id, valid_name, valid_age
 
 class Profile(models.Model):
     personal_id = models.CharField(primary_key=True, max_length=50, unique=True, validators=[valid_personal_id])
