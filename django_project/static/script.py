@@ -163,6 +163,28 @@ def proxy_container(e):
     e.stopPropagation()
 
 
+
+def errors_template(errors:dict):
+    global templateDangerResponse, fragment, response_loc
+
+    # response_loc.textContent = ''
+
+    templateDangerResponse.querySelector('h5').textContent = 'error in the data entered'
+
+    string = '<b>- {}:</b> {}<br />'
+
+    message = 'the following errors were found:<br /><br />'
+
+    for key, value in errors.items():
+        message += string.format(key, value[0])
+
+    templateDangerResponse.querySelector('p').innerHTML = message[:-1]
+
+    clone = templateDangerResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)
+
+
 def search_template():
     """
     Esta función se encarga de crear el template ante la respuesta de presionar el botón "search"
@@ -280,11 +302,11 @@ async def export_data(e):
     a.download = 'export.csv'
     a.click()
 
-def create_template():
+def create_success_template():
     """
     Esta función se encarga de crear el template ante la respuesta de presionar el botón "create"
     """
-    global templateCreateResponse, fragment, response_loc
+    global templateSuccessResponse, fragment, response_loc
 
     personal_id = document.getElementById('id')
     name = document.getElementById('name')
@@ -296,11 +318,13 @@ def create_template():
     last_name.value = ''
     age.value = ''
 
-    clone = templateCreateResponse.cloneNode(True)
+    templateSuccessResponse.querySelector('h5').textContent = 'Profile created successfully!'
+
+    clone = templateSuccessResponse.cloneNode(True)
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)    
-
 async def create_data(e):
+
     console.log('create_data')
     # console.log('1', e.target.parentElement)
 
@@ -326,35 +350,26 @@ async def create_data(e):
         body=body
     )
     
-    personal_id = document.getElementById('id')
-    name = document.getElementById('name')
-    last_name = document.getElementById('last_name')
-    age = document.getElementById('age')
     
-    
-    if response.get('errors'):#TODO
+    if response.get('errors'):
         errors = response.get('errors')
-        for field in errors.keys():
-            console.log(str(field), str(errors[field]))
+        errors_template(errors)
 
     else:
         console.log('request OK')
-        create_template()
+        create_success_template()
 
-def errors_template(errors):
+def update_success_template():
     pass
-
-
 async def update_data(e):
+
     console.log('update_data')
 
     personal_id = document.querySelectorAll('.form-control-sm')[0]
     personal_id_input = personal_id.value
 
     if personal_id_input == '':
-        personal_id.setAttribute('required',True)
-        personal_id.classList.add('is-invalid')
-        errors = {'personal_id': 'This field is required.'}
+        errors = {'personal_id': ['This field is required']}
         return errors_template(errors)
 
     response = await make_request(
@@ -364,12 +379,14 @@ async def update_data(e):
     console.log(str(response))
 
     if response.get('errors'):
-        personal_id.classList.add('invalid')
+        errors = response.get('errors')
+        errors_template(errors)
+
     else:
         console.log('request OK')
-        personal_id.classList.add('valid')
+        update_success_template()
 
-def delete_template():
+def delete_success_template():
     pass
 async def delete_data(e):
     console.log('delete_data')
@@ -377,12 +394,9 @@ async def delete_data(e):
     personal_id = document.querySelectorAll('.form-control-sm')[0]
     personal_id_input = personal_id.value
 
-    console.log('personal_id_value:', str(personal_id_input==''))
-
     if personal_id_input == '':
-        personal_id.className = 'invalid'
-        # personal_id.className = 'is-invalid'
-        return
+        errors = {'personal_id': ['This field is required']}
+        return errors_template(errors)
 
     response = await make_request(
         url='http://localhost:8000/api/v1/profiles/{}/'.format(personal_id_input),
@@ -392,12 +406,10 @@ async def delete_data(e):
 
     if response.get('errors'):
         errors = response.get('errors')
-        for field in errors.keys():
-            console.log(str(field), str(errors[field]))
-
+        errors_template(errors)
     else:
         console.log('request OK')
-        delete_template()
+        delete_success_template()
 
 async def proxy_form_location(e):
     global templateForm
@@ -482,7 +494,7 @@ async def proxy_response_location(e):
 def main():
     # created in HTML
     global container,  form_loc, response_loc
-    global templateForm, templateSearchResponse, templateCreateResponse
+    global templateForm, templateSearchResponse, templateSuccessResponse, templateDangerResponse
 
     # created localy
     global fragment, searchResponse, searchNormalizedResponse, x
@@ -497,7 +509,8 @@ def main():
     response_loc = document.querySelector('#response-loc')
     templateForm = document.getElementById('template-form').content
     templateSearchResponse = document.getElementById('template-search-response').content
-    templateCreateResponse = document.getElementById('template-create-response').content
+    templateSuccessResponse = document.getElementById('template-success-response').content
+    templateDangerResponse = document.getElementById('template-danger-response').content
 
     container.addEventListener('click', create_proxy(proxy_container))
 

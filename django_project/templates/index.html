@@ -46,10 +46,12 @@
         </table>
     </div>
 
-    <div id="form-loc">
-    </div>
-    
-    <div id="response-loc">
+    <div class="container">
+        <div id="form-loc">
+        </div>
+        
+        <div id="response-loc" class="py-2">
+        </div>
     </div>
     
 
@@ -94,11 +96,16 @@
         </div>
     </template>
 
-    <template id="template-create-response">
-        <div class="card">
-            <div class="card-body text-center">
-                <h5>Profile created successfully!</h5>
-            </div>
+    <template id="template-success-response">
+        <div class="alert alert-success text-center" role="alert">
+            <h5>Operation was successful!</h5>
+        </div>
+    </template>
+
+    <template id="template-danger-response">
+        <div class="alert alert-danger text-center" role="alert">
+            <h5>Operation get errors!</h5>
+            <p>Acá te cuento de que se te trata el <b>error</b></p>
         </div>
     </template>
 
