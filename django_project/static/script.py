@@ -25,7 +25,6 @@ def create_button(textContent, id, className):
     button.setAttribute('class', className)
     return button
 
-
 async def make_request(url, method, body=None, headers=None):
     
     csrf = document.getElementsByName('csrfmiddlewaretoken')[0].value
@@ -58,7 +57,6 @@ async def make_request(url, method, body=None, headers=None):
         return await response.json()
 
     return await response.json()
-
 
 def read_download_form():
     global fragment, form_loc, templateForm
@@ -163,11 +161,10 @@ def proxy_container(e):
     e.stopPropagation()
 
 
-
 def errors_template(errors:dict):
     global templateDangerResponse, fragment, response_loc
 
-    # response_loc.textContent = ''
+    response_loc.textContent = ''
 
     templateDangerResponse.querySelector('h5').textContent = 'error in the data entered'
 
@@ -184,7 +181,6 @@ def errors_template(errors:dict):
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)
 
-
 def search_template():
     """
     Esta función se encarga de crear el template ante la respuesta de presionar el botón "search"
@@ -193,7 +189,6 @@ def search_template():
     global searchResponse, searchNormalizedResponse
     
     response_loc.textContent = ''
-    templateSearchResponse.querySelector('#response').textContent = ''
     templateSearchResponse.querySelector('#search-buttons').textContent = ''
 
     templateSearchResponse.querySelector('h5').textContent = 'Se encontraron {} resultados'.format(searchResponse['count'].values[0])
@@ -241,43 +236,44 @@ async def search_data(e):
     }
     
     data = {key: value for key, value in data.items() if value != ''}
-    # console.log('data', str(data))
 
+    if data == {}:
+        errors_template({'fields': ['at least one field must be filled']})
+        return
+    
     url = 'http://localhost:8000/api/v1/profiles/?page=1&'
     for key, value in data.items():
         url += f'{key}={value}&'
     url = url[:-1]
-    # console.log(url)
-
     
     response = await make_request(
         url=url,
         method='GET'
     )
-    # console.log(json.dumps(response))
-
-
 
     if response.get('errors'):
-        # search for wich field is wrong
-        # console.log(templateForm.querySelector('#form'))   <--- TODO: cambiar class a este elemento
-        # add a classList with 'is-invalid' to the field
-        # show error message
-        pass
+        errors_template(response['errors'])
     else:
-        # change classList = 'form-control form-control-sm is-valid'
-        # get element of the new form-results id
-        # create the needed elements to show the results
-        # append the elements to the form-results
-
-
         searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]].to_frame().T
         searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
         searchNormalizedResponse.index += 1
         search_template()
 
+def export_success_template():
+    global templateSuccessResponse, fragment, response_loc
+
+    response_loc.textContent = ''
+
+    templateSuccessResponse.querySelector('h5').textContent = 'download successfull'
+
+    clone = templateSuccessResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)
 async def export_data(e):
+    global response_loc
     console.log('export_data')
+
+    response_loc.textContent = ''
 
     personal_id = document.querySelectorAll('.form-control-sm')[0].value
     name = document.querySelectorAll('.form-control-sm')[1].value
@@ -292,6 +288,10 @@ async def export_data(e):
     }
     data = {key: value for key, value in data.items() if value != ''}
 
+    if data == {}:
+        errors_template({'fields': ['at least one field must be filled']})
+        return
+
     url = 'http://localhost:8000/api/v1/contents/?'
     for key, value in data.items():
         url += f'{key}={value}&'
@@ -302,11 +302,15 @@ async def export_data(e):
     a.download = 'export.csv'
     a.click()
 
+    export_success_template()
+
 def create_success_template():
     """
     Esta función se encarga de crear el template ante la respuesta de presionar el botón "create"
     """
     global templateSuccessResponse, fragment, response_loc
+
+    response_loc.textContent = ''
 
     personal_id = document.getElementById('id')
     name = document.getElementById('name')
@@ -360,7 +364,11 @@ async def create_data(e):
         create_success_template()
 
 def update_success_template():
-    pass
+    global response_loc
+
+    response_loc.textContent = ''
+
+    console.log('template update success')
 async def update_data(e):
 
     console.log('update_data')
@@ -387,7 +395,11 @@ async def update_data(e):
         update_success_template()
 
 def delete_success_template():
-    pass
+    global response_loc
+
+    response_loc.textContent = ''
+
+    console.log('template update success')
 async def delete_data(e):
     console.log('delete_data')
 
@@ -414,30 +426,28 @@ async def delete_data(e):
 async def proxy_form_location(e):
     global templateForm
 
-    console.log(e.target)#TODO: borrar
-
     action = templateForm.querySelector('#form').dataset.id
     button_id = e.target.id
 
     if action == 'action-1' and button_id == 'search':
         console.log(e.target)
-        data = await search_data(e)
+        await search_data(e)
 
     elif action == 'action-1' and button_id == 'export':
         console.log(e.target)
-        data = await export_data(e)
+        await export_data(e)
 
     elif action == 'action-2' and button_id == 'create':
         console.log(e.target)
-        data = await create_data(e)
+        await create_data(e)
 
     elif action == 'action-3' and button_id == 'update':
         console.log(e.target)
-        data = await update_data(e)
+        await update_data(e)
 
     elif action == 'action-3' and button_id == 'delete':
         console.log(e.target)
-        data = await delete_data(e)
+        await delete_data(e)
 
     e.stopPropagation()
 
