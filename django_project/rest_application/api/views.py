@@ -55,11 +55,12 @@ def get_put_delete_profile(request, pk):
     
     if 'ManageAssert' in request.headers:
         if request.headers['ManageAssert'] == 'True':
+            
+
             return Response({'errors': 'invalid ID'})
-    
+
     if not pk.isdigit():
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
     try:
         profile = Profile.objects.get(pk=pk)
