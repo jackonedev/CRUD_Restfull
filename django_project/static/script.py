@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 from itertools import count
 
-def create_field(id=None):
+def create_input_field(id=None):
     field = document.createElement('input')
     field.type = 'text'
     field.setAttribute('class', 'form-control-sm mb-2 row')
@@ -34,7 +34,7 @@ async def make_request(url, method, body=None, headers=None):
         'X-Requested-With': 'XMLHttpRequest',
         'Content-Type': 'application/json',
         'X-CSRFToken': csrf,
-        'Manage': 'False'
+        'ManageAssert': 'False'
 }
 
     if headers:
@@ -48,10 +48,10 @@ async def make_request(url, method, body=None, headers=None):
 )
     
     if not 200 <= response.status < 300:
-        default_headers.update({'Manage': 'True'})
+        default_headers.update({'ManageAssert': 'True'})
         response = await pyfetch(
             url=url,
-            method=method,
+            method='GET',
             body=body,
             headers=default_headers
     )
@@ -65,10 +65,10 @@ def read_download_form():
     form_loc.textContent = ''
     templateForm.querySelector('#form').textContent = ''
 
-    field_personal_id = create_field(id='id')
-    field_name = create_field(id='name')
-    field_last_name = create_field(id='last_name')
-    field_age = create_field(id='age')
+    field_personal_id = create_input_field(id='id')
+    field_name = create_input_field(id='name')
+    field_last_name = create_input_field(id='last_name')
+    field_age = create_input_field(id='age')
     
     field_personal_id.placeholder = 'id (* to match the rest)'
     field_name.placeholder = "name"
@@ -97,10 +97,10 @@ def create_form():
     form_loc.textContent = ''
     templateForm.querySelector('#form').textContent = ''
 
-    field_personal_id = create_field(id='id')
-    field_name = create_field(id='name')
-    field_last_name = create_field(id='last_name')
-    field_age = create_field(id='age')
+    field_personal_id = create_input_field(id='id')
+    field_name = create_input_field(id='name')
+    field_last_name = create_input_field(id='last_name')
+    field_age = create_input_field(id='age')
     
     field_personal_id.placeholder = 'id'
     field_name.placeholder = "name"
@@ -126,7 +126,7 @@ def update_delete_form():
     form_loc.textContent = ''
     templateForm.querySelector('#form').textContent = ''
 
-    field_personal_id = create_field()
+    field_personal_id = create_input_field()
     field_personal_id.placeholder = 'input exact id'
 
     update = create_button('Update', 'update', 'btn btn-primary btn-sm mx-2')
@@ -163,7 +163,7 @@ def proxy_container(e):
     e.stopPropagation()
 
 
-async def search_template():
+def search_template():
     """
     Esta función se encarga de crear el template ante la respuesta de presionar el botón "search"
     """
@@ -252,7 +252,7 @@ async def search_data(e):
         searchResponse = pd.read_json(json.dumps(response)).loc[0, ["count", "next", "previous"]].to_frame().T
         searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
         searchNormalizedResponse.index += 1
-        await search_template()
+        search_template()
 
 async def export_data(e):
     console.log('export_data')
@@ -280,6 +280,25 @@ async def export_data(e):
     a.download = 'export.csv'
     a.click()
 
+def create_template():
+    """
+    Esta función se encarga de crear el template ante la respuesta de presionar el botón "create"
+    """
+    global templateCreateResponse, fragment, response_loc
+
+    personal_id = document.getElementById('id')
+    name = document.getElementById('name')
+    last_name = document.getElementById('last_name')
+    age = document.getElementById('age')
+
+    personal_id.value = ''
+    name.value = ''
+    last_name.value = ''
+    age.value = ''
+
+    clone = templateCreateResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)    
 
 async def create_data(e):
     console.log('create_data')
@@ -313,12 +332,19 @@ async def create_data(e):
     age = document.getElementById('age')
     
     
-    if response.get('errors'):
+    if response.get('errors'):#TODO
         errors = response.get('errors')
         for field in errors.keys():
             console.log(str(field), str(errors[field]))
+
+
+
+
+
     else:
         console.log('request OK')
+        create_template()
+
 
 async def update_data(e):
     console.log('update_data')
@@ -433,8 +459,8 @@ async def proxy_response_location(e):
 
 def main():
     # created in HTML
-    global container, templateForm, form_loc
-    global templateSearchResponse, response_loc
+    global container,  form_loc, response_loc
+    global templateForm, templateSearchResponse, templateCreateResponse
 
     # created localy
     global fragment, searchResponse, searchNormalizedResponse, x
@@ -449,7 +475,7 @@ def main():
     response_loc = document.querySelector('#response-loc')
     templateForm = document.getElementById('template-form').content
     templateSearchResponse = document.getElementById('template-search-response').content
-    
+    templateCreateResponse = document.getElementById('template-create-response').content
 
     container.addEventListener('click', create_proxy(proxy_container))
 
