@@ -191,7 +191,7 @@ def search_template():
     response_loc.textContent = ''
     templateSearchResponse.querySelector('#search-buttons').textContent = ''
 
-    templateSearchResponse.querySelector('h5').textContent = 'Se encontraron {} resultados'.format(searchResponse['count'].values[0])
+    templateSearchResponse.querySelector('h5').textContent = 'Total results: {}'.format(searchResponse['count'].values[0])
     
     console.log('Search Template')
     console.log(searchResponse.to_string())
@@ -347,13 +347,11 @@ async def create_data(e):
     url = 'http://localhost:8000/api/v1/profiles/'
     body = json.dumps(data)
     
-
     response = await make_request(
         url=url,
         method='POST',
         body=body
     )
-    
     
     if response.get('errors'):
         errors = response.get('errors')
@@ -363,7 +361,7 @@ async def create_data(e):
         console.log('request OK')
         create_success_template()
 
-def update_success_template():
+def update_search_template():
     global response_loc
 
     response_loc.textContent = ''
@@ -392,14 +390,30 @@ async def update_data(e):
 
     else:
         console.log('request OK')
-        update_success_template()
+        update_search_template()
 
-def delete_success_template():
-    global response_loc
-
+def delete_search_template():
+    global templateSearchResponse, fragment, response_loc
+    
     response_loc.textContent = ''
-
+    templateSearchResponse.querySelector('#search-buttons').textContent = ''
+    
     console.log('template update success')
+    
+    templateSearchResponse.querySelector('h5').textContent = 'Confirm delete?'
+
+    templateSearchResponse.querySelector('#response').innerHTML = """
+    hola
+    """
+
+    confirm = create_button(textContent='Confirm', id='confirm', className='btn btn-danger btn-sm shadow m-2 p1 border border-primary')
+
+    templateSearchResponse.querySelector('#search-buttons').appendChild(confirm)
+
+    clone = templateSearchResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)
+
 async def delete_data(e):
     console.log('delete_data')
 
@@ -421,7 +435,7 @@ async def delete_data(e):
         errors_template(errors)
     else:
         console.log('request OK')
-        delete_success_template()
+        delete_search_template()
 
 async def proxy_form_location(e):
     global templateForm
