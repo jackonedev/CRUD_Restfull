@@ -74,7 +74,7 @@ def read_download_form():
     field_age.placeholder = "age"
 
     search = create_button('Search', 'search', 'btn btn-primary btn-sm mx-2')
-    export = create_button('Export', 'export', 'btn btn-primary btn-sm mx-2')#TODO: checkear export data
+    export = create_button('Export', 'export', 'btn btn-primary btn-sm mx-2')
 
 
     templateForm.querySelector('.card-title').textContent = 'Search and Export'
@@ -140,9 +140,8 @@ def update_delete_form():
     clone = templateForm.cloneNode(True)
     fragment.appendChild(clone)
     form_loc.appendChild(fragment)
-
 def proxy_container(e):
-    global form_loc, templateForm, response_loc
+    global response_loc
 
     if e.target.id == 'read-download-form' or e.target.id == 'create-form' or e.target.id == 'update-delete-form':
         console.log(e.target)
@@ -258,7 +257,6 @@ async def search_data(e):
         searchNormalizedResponse = pd.json_normalize(response, record_path=['results'])
         searchNormalizedResponse.index += 1
         search_template()
-
 def export_success_template():
     global templateSuccessResponse, fragment, response_loc
 
@@ -303,7 +301,6 @@ async def export_data(e):
     a.click()
 
     export_success_template()
-
 def create_success_template():
     """
     Esta función se encarga de crear el template ante la respuesta de presionar el botón "create"
@@ -360,7 +357,6 @@ async def create_data(e):
     else:
         console.log('request OK')
         create_success_template()
-
 def update_search_template():
     global response_loc
 
@@ -391,27 +387,11 @@ async def update_data(e):
     else:
         console.log('request OK')
         update_search_template()
-
-def delete_success_template():
-    global templateSuccessResponse, fragment, response_loc, templateForm
-
-    templateForm.querySelector('#form').textContent = ''
-
-    response_loc.textContent = ''
-
-    templateSuccessResponse.querySelector('h5').textContent = 'Profile deleted successfully!'
-
-    clone = templateSuccessResponse.cloneNode(True)
-    fragment.appendChild(clone)
-    response_loc.appendChild(fragment)
 def delete_search_template(data: dict):
-    global templateSearchResponse, fragment, response_loc, templateForm
+    global templateSearchResponse, fragment, response_loc
     
     response_loc.textContent = ''
-    templateForm.querySelector('#form').textContent = ''
     templateSearchResponse.querySelector('#search-buttons').textContent = ''
-    
-    console.log('template update success')
     
     templateSearchResponse.querySelector('h5').textContent = 'Confirm delete?'
 
@@ -432,8 +412,11 @@ def delete_search_template(data: dict):
     clone = templateSearchResponse.cloneNode(True)
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)
+    
+    
 
 async def delete_data(e):
+    global templateForm
     console.log('delete_data')
 
     personal_id = document.querySelectorAll('.form-control-sm')[0]
@@ -452,9 +435,8 @@ async def delete_data(e):
         errors = response.get('errors')
         errors_template(errors)
     else:
-        console.log('request OK')
+        console.log('DE ACÁ PARA ARRIBA NO SE ESTÁ BORRANDO EL VALOR INGRESADO')
         delete_search_template(response)
-
 async def proxy_form_location(e):
     global templateForm
 
@@ -484,6 +466,19 @@ async def proxy_form_location(e):
     e.stopPropagation()
 
 
+
+def delete_success_template():
+    global templateSuccessResponse, fragment, response_loc
+
+    response_loc.textContent = ''
+
+    templateSuccessResponse.querySelector('h5').textContent = 'Profile deleted successfully!'
+
+    clone = templateSuccessResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)
+
+    update_delete_form()
 async def change_page(e, forward):
     """
     Esta función se encarga de hacer el request con la nueva página
@@ -517,33 +512,26 @@ async def change_page(e, forward):
         searchNormalizedResponse.index += (5 * x)
 
     search_template()
-
 async def delete_confirm(e):
     console.log('delete_confirm')
 
+    personal_id = document.querySelectorAll('.form-control-sm')[0].value
 
-    personal_id = document.querySelectorAll('.form-control-sm')[0]
-    personal_id_input = personal_id.value
-
-    console.log(str(personal_id_input))
-
-    if personal_id_input == '':
+    if personal_id == '':
         errors = {'personal_id': ['This field is required']}
         return errors_template(errors)
 
     response = await make_request(
-        url='http://localhost:8000/api/v1/profiles/{}/'.format(personal_id_input),
+        url='http://localhost:8000/api/v1/profiles/{}/'.format(personal_id),
         method='DELETE'
     )
-    
-    delete_success_template()
 
+    delete_success_template()
 async def proxy_response_location(e):
     global templateSearchResponse, response_loc
 
     if e.target.id == 'previous' or e.target.id == 'next' or e.target.id == 'confirm':
         console.log(e.target)
-        # response_loc.textContent = ''
 
     if e.target.id == 'previous':
         console.log('previous')
@@ -554,6 +542,7 @@ async def proxy_response_location(e):
         await change_page(e, forward=True)
 
     elif e.target.id == 'confirm':
+        console.log('CONFIRM: ', e.target)
         console.log('confirm')
         await delete_confirm(e)
 

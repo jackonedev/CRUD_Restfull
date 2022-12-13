@@ -85,6 +85,8 @@ def get_put_delete_profile(request, pk):
     
     elif request.method == 'DELETE':
         profile.delete()
+        # if 'ManageAssert' in request.headers:
+        #     return Response({'status': 'deleted'})
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
