@@ -17,12 +17,14 @@ def get_query_params(request, model):
         "age": age,
     }
 
+
     query_params = {k: v for k, v in query_params.items() if v is not None}
     for k, v in query_params.items():
         if k == "id":
             v = v.replace("-", "").replace(".", "").replace("*", "")
-            if not v.isdigit() or v != "":
-                return "bad request"
+            if v != "":
+                if not v.isdigit():
+                    return "bad request"
         elif k == "age":
             if not v.isdigit():
                 return "bad request"
@@ -33,8 +35,11 @@ def get_query_params(request, model):
             if v.isdigit():
                 return "bad request"
 
-    # Validacion 3
-    id = id.replace("-", "").replace(".", "")
+    # Retorno 1
+    try:
+        id = id.replace("-", "").replace(".", "")
+    except:
+        pass
     if id:
         if not id.startswith("*") and not id.endswith("*"):
             profiles = model.objects.filter(personal_id=id)
@@ -52,7 +57,7 @@ def get_query_params(request, model):
 
         return profiles
 
-    # Validacion 4
+    # Retorno 2
     try:
         name = name.title()
     except:
