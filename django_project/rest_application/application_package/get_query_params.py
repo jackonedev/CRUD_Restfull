@@ -7,6 +7,10 @@ def get_query_params(request, model):
     if not (name or last_name or age or id):
         return 1 / 0
 
+
+    if id.isalpha() or age.isalpha() or name.isdigit() or last_name.isdigit():
+        return "bad request"
+
     # first search
     if id:
         if not id.startswith("*") and not id.endswith("*"):
