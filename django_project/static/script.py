@@ -185,7 +185,26 @@ def errors_template(errors: dict):
     clone = templateDangerResponse.cloneNode(True)
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)
-
+def data_validation(data:dict):
+    errors = {}
+    for k, v in data.items():
+        if k == "id":
+            v = v.replace("-", "").replace(".", "").replace("*", "")
+            if v!="":
+                if not v.isdigit():
+                    errors['personal_id'] = ["personal_id must be a number"]
+        elif k == "age":
+            if not v.isdigit():
+                errors[k] = ["A valid integer is required."]
+            elif int(v) < 18:
+                errors[k] = ["age must be greater than 18"]
+        elif k == "name":
+            if not v.isalpha():
+                errors[k] = ["name must be a string"]
+        elif k == "last_name":
+            if not v.isalpha():
+                errors[k] = ["last_name must be a string"]
+    return errors
 
 def search_template():
     """
@@ -247,11 +266,17 @@ async def search_data(e):
     age = document.querySelectorAll(".form-control-sm")[3].value
 
     data = {"id": personal_id, "name": name, "last_name": last_name, "age": age}
-
     data = {key: value for key, value in data.items() if value != ""}
-
+    
+    # Validation 1
     if data == {}:
         errors_template({"fields": ["at least one field must be filled"]})
+        return
+
+    # Validation 2
+    errors = data_validation(data)
+    if errors != {}:
+        errors_template(errors)
         return
 
     url = "http://localhost:8000/api/v1/profiles/?page=1&"
@@ -306,29 +331,9 @@ async def export_data(e):
         return
 
     # Validation 2
-    errors_dict = {}
-    for k, v in data.items():
-        if k == "id":
-            console.log(v)
-            v = v.replace("-", "").replace(".", "").replace("*", "")
-            console.log(v)
-            bool1 = v == ""
-            console.log(bool1)
-            if not v.isdigit() or v != "":
-                errors_dict['personal_id'] = ["personal_id must be a number"]
-        elif k == "age":
-            if not v.isdigit():
-                errors_dict[k] = ["A valid integer is required."]
-            elif int(v) < 18:
-                errors_dict[k] = ["age must be greater than 18"]
-        elif k == "name":
-            if not v.isalpha():
-                errors_dict[k] = ["name must be a string"]
-        elif k == "last_name":
-            if not v.isalpha():
-                errors_dict[k] = ["last_name must be a string"]
-    if errors_dict != {}:
-        errors_template(errors_dict)
+    errors = data_validation(data)
+    if errors != {}:
+        errors_template(errors)
         return
 
     # Make request
@@ -339,7 +344,7 @@ async def export_data(e):
 
     a = document.createElement("a")
     a.href = url
-    a.download = "export.csv"
+    a.download = "export-failed.csv"
     a.click()
 
     export_success_template()
