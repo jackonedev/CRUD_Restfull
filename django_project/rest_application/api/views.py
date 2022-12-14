@@ -13,6 +13,13 @@ from ..models import Profile
 from .serializers import ProfileSerializer
 
 
+def validate_serialized_data(serializer):
+    data = serializer.validated_data
+    data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
+    data["name"] = data["name"].title()
+    data["last_name"] = data["last_name"].title()
+    return ProfileSerializer(data=data)
+
 class MyPagination(PageNumberPagination):
     page_size = 5
 
@@ -36,11 +43,7 @@ def get_post_profile(request):
     elif request.method == "POST":
         serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
-            data = serializer.validated_data
-            data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
-            data["name"] = data["name"].title()
-            data["last_name"] = data["last_name"].title()
-            serializer = ProfileSerializer(data=data)
+            serializer = validate_serialized_data(serializer)
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -57,6 +60,11 @@ def get_put_delete_profile(request, pk):
         if request.headers["ManageAssert"] == "True":
             if not pk.isdigit():
                 return Response({"errors": {"personal_id": ["ID must be a number"]}})
+            
+            elif request.method == "PUT":
+                serializer = ProfileSerializer(data=request.data)
+                return Response({"errors": serializer.errors})
+            
             else:
                 return Response({"errors": {"personal_id": ["ID not found"]}})
 
@@ -75,9 +83,11 @@ def get_put_delete_profile(request, pk):
     elif request.method == "PUT":
         serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
-            data = serializer.validated_data
-            data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
-            serializer = ProfileSerializer(data=data)
+            # data = serializer.validated_data
+            # data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
+            # data["name"] = data["name"].title()
+            # data["last_name"] = data["last_name"].title()
+            serializer = validate_serialized_data(serializer)
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data)
@@ -96,6 +106,18 @@ def download_csv(request):
     writer.writerow(["personal_id", "name", "last_name", "age"])
 
     profiles = get_query_params(request, Profile)
+
+    if "ManageAssert" in request.headers:
+        if request.headers["ManageAssert"] == "True":
+            return Response({"errors": {"response status code": [profiles]}})
+
+    if profiles == "not found":
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    elif profiles == "bad request":
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    print ('download_csv get_query_params output: ', profiles)
 
     for row in profiles:
         writer.writerow([row.personal_id, row.name, row.last_name, row.age])
