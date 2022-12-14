@@ -54,6 +54,9 @@ async def make_request(url, method, body=None, headers=None):
         )
         return await response.json()
 
+    if response.status == 204:
+        return
+
     return await response.json()
 
 
@@ -479,7 +482,6 @@ async def delete_data(e):
         errors = response.get("errors")
         errors_template(errors)
     else:
-        console.log("DE ACÁ PARA ARRIBA NO SE ESTÁ BORRANDO EL VALOR INGRESADO")
         delete_search_template(response)
 
 async def proxy_form_location(e):
@@ -533,7 +535,7 @@ async def delete_confirm(e):
     console.log("delete_confirm")
 
     personal_id = document.querySelectorAll(".form-control-sm")[0].value
-
+    console.log(personal_id)
     if personal_id == "":
         errors = {"personal_id": ["This field is required"]}
         return errors_template(errors)
@@ -593,7 +595,6 @@ async def proxy_response_location(e):
         await change_page(e, forward=True)
 
     elif e.target.id == "confirm":
-        console.log("CONFIRM: ", e.target)
         console.log("confirm")
         if e.target.classList.contains("btn-danger"):
             await delete_confirm(e)
