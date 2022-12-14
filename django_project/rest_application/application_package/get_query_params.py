@@ -4,14 +4,36 @@ def get_query_params(request, model):
     last_name = request.query_params.get("last_name", None)
     age = request.query_params.get("age", None)
 
+
+    # Validacion 1
     if not (name or last_name or age or id):
         return 1 / 0
 
+    query_params = {
+        "id": id,
+        "name": name,
+        "last_name": last_name,
+        "age": age,
+    }
 
-    if id.isalpha() or age.isalpha() or name.isdigit() or last_name.isdigit():
-        return "bad request"
+    # Validacion 2
+    query_params = {k: v for k, v in query_params.items() if v is not None}
 
-    # first search
+    for k, v in query_params.items():
+        if k == "id":
+            if not v.isdigit():
+                return "bad request"
+        elif k == "age":
+            if not v.isdigit():
+                return "bad request"
+        elif k == "name":
+            if v.isdigit():
+                return "bad request"
+        elif k == "last_name":
+            if v.isdigit():
+                return "bad request"
+
+    # Validacion 3
     if id:
         if not id.startswith("*") and not id.endswith("*"):
             profiles = model.objects.filter(personal_id=id)
@@ -29,7 +51,7 @@ def get_query_params(request, model):
 
         return profiles
 
-    # second search
+    # Validacion 4
     try:
         name = name.title()
     except:
