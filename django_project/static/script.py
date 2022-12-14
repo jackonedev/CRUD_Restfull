@@ -309,7 +309,12 @@ async def export_data(e):
     errors_dict = {}
     for k, v in data.items():
         if k == "id":
-            if not v.isdigit():
+            console.log(v)
+            v = v.replace("-", "").replace(".", "").replace("*", "")
+            console.log(v)
+            bool1 = v == ""
+            console.log(bool1)
+            if not v.isdigit() or v != "":
                 errors_dict['personal_id'] = ["personal_id must be a number"]
         elif k == "age":
             if not v.isdigit():
@@ -322,7 +327,6 @@ async def export_data(e):
         elif k == "last_name":
             if not v.isalpha():
                 errors_dict[k] = ["last_name must be a string"]
-
     if errors_dict != {}:
         errors_template(errors_dict)
         return

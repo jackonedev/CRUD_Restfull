@@ -27,6 +27,7 @@ class MyPagination(PageNumberPagination):
 @api_view(["GET", "POST"])
 def get_post_profile(request):
     if request.method == "GET":
+        #TODO: manejar aserciones con el headers
         try:
             profiles = get_query_params(request, Profile)
             if profiles == "not found":
