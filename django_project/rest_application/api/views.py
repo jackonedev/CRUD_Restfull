@@ -13,12 +13,6 @@ from ..models import Profile
 from .serializers import ProfileSerializer
 
 
-def validate_serialized_data(serializer):
-    data = serializer.validated_data
-    data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
-    data["name"] = data["name"].title()
-    data["last_name"] = data["last_name"].title()
-    return ProfileSerializer(data=data)
 
 class MyPagination(PageNumberPagination):
     page_size = 5
@@ -60,7 +54,10 @@ def get_post_profile(request):
     elif request.method == "POST":
         serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
-            serializer = validate_serialized_data(serializer)
+            data = serializer.validated_data
+            data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
+            data["name"] = data["name"].title()
+            data["last_name"] = data["last_name"].title()
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -97,15 +94,19 @@ def get_put_delete_profile(request, pk):
         return Response(serializer.data)
 
     elif request.method == "PUT":
+        print ('\nDENTRO DEL PUT\n')
+        print (request.data)
         serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
-            # data = serializer.validated_data
-            # data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
-            # data["name"] = data["name"].title()
-            # data["last_name"] = data["last_name"].title()
-            serializer = validate_serialized_data(serializer)
+            data = serializer.validated_data
+            data["personal_id"] = data["personal_id"].replace("-", "").replace(".", "")
+            data["name"] = data["name"].title()
+            data["last_name"] = data["last_name"].title()
             if serializer.is_valid():
                 serializer.save()
+                if pk != data["personal_id"]:
+                    profile = Profile.objects.get(pk=pk)
+                    profile.delete()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
