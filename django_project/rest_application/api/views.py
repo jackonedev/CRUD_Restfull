@@ -26,8 +26,24 @@ class MyPagination(PageNumberPagination):
 
 @api_view(["GET", "POST"])
 def get_post_profile(request):
+    if "ManageAssert" in request.headers:
+        if request.headers["ManageAssert"] == "True":
+            serializer = ProfileSerializer(data=request.data)
+            if serializer.is_valid():
+                pass
+            if request.method == "GET":
+                data = get_query_params(request, Profile)
+                if data == "not found":
+                    return Response({"errors": {"Database": ["Profile not found"]}})
+                elif data == "bad request":
+                    return Response({"errors": {"Database": ["Bad request"]}})
+
+                return Response({"errors": {"errorWHY": ["ERROR VER ESTO"]}})
+                
+            elif request.method == "POST":
+                return Response({"errors": serializer.errors})
+
     if request.method == "GET":
-        #TODO: manejar aserciones con el headers
         try:
             profiles = get_query_params(request, Profile)
             if profiles == "not found":
@@ -48,9 +64,6 @@ def get_post_profile(request):
             if serializer.is_valid():
                 serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if "ManageAssert" in request.headers:
-            if request.headers["ManageAssert"] == "True":
-                return Response({"errors": serializer.errors})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -64,6 +77,8 @@ def get_put_delete_profile(request, pk):
             
             elif request.method == "PUT":
                 serializer = ProfileSerializer(data=request.data)
+                if serializer.is_valid():
+                    print ('something goes wrong')
                 return Response({"errors": serializer.errors})
             
             else:
@@ -117,8 +132,6 @@ def download_csv(request):
 
     elif profiles == "bad request":
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    print ('download_csv get_query_params output: ', profiles)
 
     for row in profiles:
         writer.writerow([row.personal_id, row.name, row.last_name, row.age])
