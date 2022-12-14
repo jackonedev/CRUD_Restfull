@@ -196,8 +196,8 @@ def data_validation(data:dict):
         elif k == "age":
             if not v.isdigit():
                 errors[k] = ["A valid integer is required."]
-            elif int(v) < 18:
-                errors[k] = ["age must be greater than 18"]
+            # elif int(v) < 18:
+            #     errors[k] = ["age must be greater than 18"]
         elif k == "name":
             if not v.isalpha():
                 errors[k] = ["name must be a string"]
@@ -402,13 +402,12 @@ async def create_data(e):
         errors_template(errors)
 
     else:
-        console.log("request OK")
         create_success_template()
 
 
 def update_search_template(data: dict):
     global response_loc, fragment, templateUpdateResponse
-    console.log("template update success")
+    console.log("search profile success")
 
     response_loc.textContent = ""
     templateUpdateResponse.querySelector("div").textContent = ""
@@ -423,7 +422,7 @@ def update_search_template(data: dict):
         id="confirm",
         className="btn btn-primary btn-sm shadow m-2 p1",
     ) 
-
+    
     templateUpdateResponse.querySelector("h5").textContent = "Update profile"
     templateUpdateResponse.querySelector("div").appendChild(personal_id)
     templateUpdateResponse.querySelector("div").appendChild(name)
@@ -434,6 +433,9 @@ def update_search_template(data: dict):
     clone = templateUpdateResponse.cloneNode(True)
     fragment.appendChild(clone)
     response_loc.appendChild(fragment)
+
+    confirm.addEventListener('click', create_proxy(update_confirm))
+
 async def update_data(e):
 
     console.log("update_data")
@@ -449,14 +451,12 @@ async def update_data(e):
         url="http://localhost:8000/api/v1/profiles/{}/".format(personal_id_input),
         method="GET",
     )
-    console.log(str(response))
 
     if response.get("errors"):
         errors = response.get("errors")
         errors_template(errors)
 
     else:
-        console.log("request OK")
         update_search_template(response)
 
 
@@ -546,10 +546,55 @@ async def proxy_form_location(e):
 
     e.stopPropagation()
 
+def update_success_template():
+    global templateSuccessResponse, fragment, response_loc
 
+    response_loc.textContent = ""
+
+    templateSuccessResponse.querySelector(
+        "h5"
+    ).textContent = "Profile updated successfully!"
+
+    clone = templateSuccessResponse.cloneNode(True)
+    fragment.appendChild(clone)
+    response_loc.appendChild(fragment)
+
+    update_delete_form()
 async def update_confirm(e):
+    global templateUpdateResponse
     console.log('update_confirm')
     console.log(e.target)
+    console.log(templateUpdateResponse)
+    console.log(templateUpdateResponse.getElementById('id'))
+    console.log(templateUpdateResponse.getElementById('name'))
+    console.log(templateUpdateResponse.getElementById('last_name'))
+    console.log(templateUpdateResponse.getElementById('age'))
+
+    id_url = templateUpdateResponse.getElementById('id').value
+    personal_id = document.getElementById('id').value
+    name = document.getElementById('name').value
+    last_name = document.getElementById('last_name').value
+    age = document.getElementById('age').value
+
+    data = {
+        "personal_id": personal_id,
+        "name": name,
+        "last_name": last_name,
+        "age": age,
+    }
+
+    url = "http://localhost:8000/api/v1/profiles/{}/".format(id_url)
+    body = json.dumps(data)
+
+    response = await make_request(url=url, method="PUT", body=body)
+    
+    if response.get("errors"):
+        errors = response.get("errors")
+        errors_template(errors)
+
+    else:
+        console.log('profile updated successfully')
+        update_success_template()
 
 def delete_success_template():
     global templateSuccessResponse, fragment, response_loc
