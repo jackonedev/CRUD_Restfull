@@ -299,10 +299,35 @@ async def export_data(e):
     data = {"id": personal_id, "name": name, "last_name": last_name, "age": age}
     data = {key: value for key, value in data.items() if value != ""}
 
+
+    # Validation 1
     if data == {}:
         errors_template({"fields": ["at least one field must be filled"]})
         return
 
+    # Validation 2
+    errors_dict = {}
+    for k, v in data.items():
+        if k == "id":
+            if not v.isdigit():
+                errors_dict['personal_id'] = ["personal_id must be a number"]
+        elif k == "age":
+            if not v.isdigit():
+                errors_dict[k] = ["A valid integer is required."]
+            elif int(v) < 18:
+                errors_dict[k] = ["age must be greater than 18"]
+        elif k == "name":
+            if not v.isalpha():
+                errors_dict[k] = ["name must be a string"]
+        elif k == "last_name":
+            if not v.isalpha():
+                errors_dict[k] = ["last_name must be a string"]
+
+    if errors_dict != {}:
+        errors_template(errors_dict)
+        return
+
+    # Make request
     url = "http://localhost:8000/api/v1/contents/?"
     for key, value in data.items():
         url += f"{key}={value}&"
