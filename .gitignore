@@ -2,6 +2,7 @@
 *_.*
 *contenido_generado*
 *descartable*
+video*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -110,6 +111,7 @@ celerybeat.pid
 .env
 .venv
 env/
+venv/
 
 ENV/
 env.bak/
